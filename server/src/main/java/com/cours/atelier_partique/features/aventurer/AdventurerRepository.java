@@ -15,9 +15,6 @@ public interface AdventurerRepository extends JpaRepository<AdventurerEntity, UU
     /** JPA Query Methods */
     Optional<AdventurerEntity> findByNameIgnoreCase(String name);
 
-    /** JPA Query Methods */
-    Page<AdventurerEntity> findByAdvClass(AdvClassEnum advClass, Pageable pageable);
-
     /** Utilisation du JPQL, la requête utilise
      * les entités et non le SQL classique*/
     @Query("""

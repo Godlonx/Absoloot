@@ -21,21 +21,21 @@ public class CreateAdventurerUseCase {
 
     private final AdventurerDomain adventurerDomain;
     private final AdventurerRepository adventurerRepository;
-    private final AdventurerMapper adventurerMapper;
+//    private final AdventurerMapper adventurerMapper;
 
-    public AdventurerDto execute(AdventurerPayload adventurerPayload) {
-        log.info("CreerAdventurerUseCase execute");
-        adventurerDomain.checkLevelAtCreation(adventurerPayload.getLevel());
-        AdventurerDto adventurerDto = buildAdventurer(adventurerPayload);
-        AdventurerEntity adventurer = adventurerMapper.fromDto(adventurerDto);
-        adventurerRepository.save(adventurer);
-        return adventurerDto;
-    }
+//    public AdventurerDto execute(AdventurerPayload adventurerPayload) {
+//        log.info("CreerAdventurerUseCase execute");
+//        adventurerDomain.checkLevelAtCreation(adventurerPayload.getLevel());
+//        AdventurerDto adventurerDto = buildAdventurer(adventurerPayload);
+//        AdventurerEntity adventurer = adventurerMapper.fromDto(adventurerDto);
+//        adventurerRepository.save(adventurer);
+//        return adventurerDto;
+//    }
 
-    private static @NonNull AdventurerDto buildAdventurer(AdventurerPayload adventurerPayload) {
-        AdventurerDto adventurerDto = new AdventurerDto();
-        UUID id = UUID.randomUUID();
-        AventurierMapper.fillAventurier(aventurierPayload, aventurier, id);
-        return aventurier;
-    }
+//    private static @NonNull AdventurerDto buildAdventurer(AdventurerPayload adventurerPayload) {
+//        AdventurerDto adventurerDto = new AdventurerDto();
+//        UUID id = UUID.randomUUID();
+//        AventurierMapper.fillAventurier(aventurierPayload, aventurier, id);
+//        return aventurier;
+//    }
 }
