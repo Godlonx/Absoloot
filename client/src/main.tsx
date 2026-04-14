@@ -5,12 +5,15 @@ import { BrowserRouter } from "react-router"
 import "./index.css"
 import App from "./App.tsx"
 import { ThemeProvider } from "@/components/theme-provider.tsx"
+import GlobalLayout from "./layouts/GlobalLayout.tsx"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <BrowserRouter>
-        <App />
+        <GlobalLayout>
+          <App />
+        </GlobalLayout>
       </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
