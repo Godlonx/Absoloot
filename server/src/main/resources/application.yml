@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: atelier-pratique
+  datasource:
+    url: jdbc:h2:mem:fantasy;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  h2:
+    console:
+      enabled: true
+      path: /h2
