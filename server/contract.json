@@ -216,15 +216,8 @@
           "Authentication"
         ],
         "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginData"
-                }
-              }
-            },
-            "description": "Successfull registry\n"
+          "200": {
+            "$ref": "#/components/responses/SuccessfullConnexion"
           },
           "400": {
             "content": {
@@ -239,11 +232,6 @@
         },
         "operationId": "register",
         "description": "Public access"
-      }
-    },
-    "/api/v1/skills": {
-      "get": {
-        "operationId": "getSkill"
       }
     }
   },
