@@ -5,7 +5,7 @@ type GlobalLayoutProps = {
   children: React.ReactNode
 }
 
-export default function GlobalLayout({ children } : GlobalLayoutProps) {
+const GlobalLayout = ({ children }: GlobalLayoutProps) => {
   return (
     <div>
       <NavigationBar />
@@ -13,3 +13,5 @@ export default function GlobalLayout({ children } : GlobalLayoutProps) {
     </div>
   )
 }
+
+export default GlobalLayout

@@ -19,7 +19,7 @@ const navigationLinks = [
   { href: "/about", label: "About" },
 ];
 
-export default function NavigationBar() {
+const NavigationBar = () => {
   const { pathname } = useLocation();
 
   const isActive = (href: string) => {
@@ -119,5 +119,7 @@ export default function NavigationBar() {
         </div>
       </div>
     </header>
-  );
+  )
 }
+
+export default NavigationBar

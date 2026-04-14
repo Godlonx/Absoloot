@@ -1,5 +1,4 @@
 import Logo from "@/components/navbar-components/logo"
-import { Link } from "react-router"
 
 interface AuthLayoutProps {
   children: React.ReactNode
@@ -7,11 +6,11 @@ interface AuthLayoutProps {
   description: string
 }
 
-export default function AuthLayout({
+const AuthLayout = ({
   children,
   title,
   description,
-}: AuthLayoutProps) {
+}: AuthLayoutProps) => {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Left side - Form */}
@@ -44,3 +43,5 @@ export default function AuthLayout({
     </div>
   )
 }
+
+export default AuthLayout

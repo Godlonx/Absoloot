@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router"
 
-export function Home() {
+const Home = () => {
   return (
     <div className="flex min-h-svh p-6">
       <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">

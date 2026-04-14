@@ -2,7 +2,7 @@ interface LogoProps {
   className?: string;
 }
 
-export default function Logo({ className }: LogoProps) {
+const Logo = ({ className }: LogoProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -36,3 +36,5 @@ export default function Logo({ className }: LogoProps) {
     </svg>
   )
 }
+
+export default Logo
