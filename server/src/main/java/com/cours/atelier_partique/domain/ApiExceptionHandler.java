@@ -21,6 +21,11 @@ public class ApiExceptionHandler {
         return buildProblemDetail(exception, HttpStatus.CONFLICT, "User already exists");
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentialsException(InvalidCredentialsException exception) {
+        return buildProblemDetail(exception, HttpStatus.UNAUTHORIZED, "Invalid credentials");
+    }
+
     private static @NonNull ProblemDetail buildProblemDetail(Exception ex, HttpStatus httpStatus, String title) {
         ProblemDetail problem = ProblemDetail.forStatus(httpStatus);
         problem.setTitle(title);

@@ -1,5 +1,7 @@
 package com.cours.atelier_partique.features.auth;
 
+import com.cours.atelier_partique.features.auth.usecase.LoginUseCase;
+import com.cours.atelier_partique.features.auth.usecase.LogoutUseCase;
 import com.cours.atelier_partique.features.auth.usecase.RegisterUseCase;
 import com.cours.atelier_partique.infrastructure.web.openapi.api.AuthenticationApi;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
@@ -13,6 +15,12 @@ public class AuthController implements AuthenticationApi {
     @Autowired
     private RegisterUseCase registerUseCase;
 
+    @Autowired
+    private LoginUseCase loginUseCase;
+
+    @Autowired
+    private LogoutUseCase logoutUseCase;
+
     @Override
     public LoginData register(RegisterCredentials registerCredentials) {
         return registerUseCase.execute(registerCredentials);
@@ -20,11 +28,11 @@ public class AuthController implements AuthenticationApi {
 
     @Override
     public LoginData login(UserCredentials userCredentials) {
-        throw new UnsupportedOperationException("Login not implemented yet");
+        return loginUseCase.execute(userCredentials);
     }
 
     @Override
     public void logout() {
-        throw new UnsupportedOperationException("Logout not implemented yet");
+        logoutUseCase.execute();
     }
 }
