@@ -1,6 +1,8 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import Logo from "@/components/navbar-components/logo";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { authService } from "@/services";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -17,15 +19,25 @@ import {
 const navigationLinks = [
   { href: "/", label: "Accueil" },
   { href: "/adventurers", label: "Aventuriers" },
+  { href: "/competences", label: "Compétences" },
 ];
 
 const NavigationBar = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, role, logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
+
+  const handleLogout = () => {
+    authService.logout();
+    logout();
+    navigate("/");
+  };
+
   return (
     <header className="border-b px-4 md:px-6">
       <div className="flex h-16 justify-between gap-4">
@@ -110,12 +122,31 @@ const NavigationBar = () => {
         </div>
         {/* Right side */}
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost">
-            <Link to={"/login"}>Se connecter</Link>
-          </Button>
-          <Button asChild>
-            <Link to={"/register"}>Créer un compte</Link>
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <span
+                className={
+                  role === "ADMIN"
+                    ? "bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium"
+                    : "bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium"
+                }
+              >
+                {role}
+              </span>
+              <Button variant="ghost" onClick={handleLogout}>
+                Se deconnecter
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost">
+                <Link to={"/login"}>Se connecter</Link>
+              </Button>
+              <Button asChild>
+                <Link to={"/register"}>Créer un compte</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
