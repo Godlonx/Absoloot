@@ -1,78 +1,78 @@
 openapi: 3.0.3
 info:
-  title: API Gestion des Aventuriers
+  title: Adventurers Management API
   version: 1.0.0
-  description: API REST pour la gestion des aventuriers — création, consultation, modification et suppression.
+  description: REST API for managing adventurers — creation, retrieval, modification and deletion.
   contact:
-    name: Guilde des Aventuriers
+    name: Adventurers Guild
   x-rate-limit:
     description: |
-      Rate limiting par utilisateur (identifié via JWT sub claim)
+      Rate limiting per user (identified via JWT sub claim)
 
-      Limites par type d'opération :
-      - GET (lecture) : 1000 requêtes / 15 minutes
-      - POST (création) : 100 requêtes / 15 minutes
-      - PUT (modification) : 100 requêtes / 15 minutes
-      - DELETE (suppression) : 50 requêtes / 15 minutes
+      Limits by operation type:
+      - GET (read) : 1000 requests / 15 minutes
+      - POST (create) : 100 requests / 15 minutes
+      - PUT (modify) : 100 requests / 15 minutes
+      - DELETE (delete) : 50 requests / 15 minutes
 
-      Headers de réponse :
-      - X-RateLimit-Limit : nombre maximum de requêtes autorisées
-      - X-RateLimit-Remaining : requêtes restantes avant reset
-      - X-RateLimit-Reset : timestamp Unix du prochain reset
+      Response headers:
+      - X-RateLimit-Limit : maximum number of allowed requests
+      - X-RateLimit-Remaining : remaining requests before reset
+      - X-RateLimit-Reset : Unix timestamp of next reset
 
-      Dépassement → HTTP 429 Too Many Requests
+      Exceeding limit → HTTP 429 Too Many Requests
   x-cors:
     description: |
-      Configuration CORS pour intégration frontend
+      CORS configuration for frontend integration
 
-      Origines autorisées (Development) :
+      Allowed origins (Development):
       - http://localhost:3000 (Create React App)
       - http://localhost:5173 (Vite)
       - http://localhost:4200 (Angular)
       - http://127.0.0.1:3000
       - http://127.0.0.1:5173
 
-      Origines autorisées (Production - futur) :
-      - https://aventuriers.digicrafters.fr
-      - https://www.aventuriers.digicrafters.fr
+      Allowed origins (Production - future):
+      - https://adventurers.digicrafters.fr
+      - https://www.adventurers.digicrafters.fr
 
-      Méthodes HTTP autorisées : GET, POST, PUT, DELETE, OPTIONS
+      Allowed HTTP methods: GET, POST, PUT, DELETE, OPTIONS
 
-      Headers requis dans les requêtes :
+      Required headers in requests:
       - Content-Type: application/json
-      - Authorization: Bearer <JWT_TOKEN> (sauf login/register)
+      - Authorization: Bearer <JWT_TOKEN> (except login/register)
 
-      Headers exposés dans les réponses :
+      Exposed headers in responses:
       - X-RateLimit-Limit
       - X-RateLimit-Remaining
       - X-RateLimit-Reset
       - Content-Type
       - Content-Length
 
-      Credentials autorisés : true (inclus dans requêtes)
-      Max age preflight : 3600 secondes (1 heure)
+      Allowed credentials: true (included in requests)
+      Max age preflight: 3600 seconds (1 hour)
   x-api-versioning:
     description: |
-      Stratégie de versioning : URL versioning simple
+      Versioning strategy: Simple URL versioning
 
-      Version actuelle : v1
+      Current version: v1
 
-      Pas de déprécation prévue à court terme.
+      No deprecation planned in the short term.
 
-      Les endpoints utilisent le prefix /api/v1/ pour :
-      - Supporter les futures versions sans breaking changes
-      - Faciliter la coexistence de versions si nécessaire
-      - Maintenir une API stable pour les clients
+      Endpoints use the /api/v1/ prefix for:
+      - Supporting future versions without breaking changes
+      - Facilitating version coexistence if needed
+      - Maintaining a stable API for clients
   x-frontend-integration:
     description: |
-      Guide d'intégration pour le frontend
+      Frontend integration guide
 
-      Configuration client (exemple avec fetch) :
+      Client configuration (fetch example):
       ```
       const API_BASE = 'http://localhost:8080/api/v1'
       const token = localStorage.getItem('jwt_token')
 
-      fetch(`${API_BASE}/aventurers`, {
+      fetch(`${API_BASE}/adventurers`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -81,42 +81,42 @@ info:
       })
       ```
 
-      Variables d'environnement recommandées :
+      Recommended environment variables:
       - REACT_APP_API_BASE_URL (React)
       - VITE_API_BASE_URL (Vite)
       - NG_APP_API_BASE_URL (Angular)
 
-      Gestion du JWT :
-      1. Après login/register : stocker le token dans localStorage/sessionStorage
-      2. Sur chaque requête : inclure dans header Authorization
-      3. Erreur 401 : nettoyer le token et rediriger vers login
-      4. Sur logout : supprimer le token côté client
+      JWT management:
+      1. After login/register: store the token in localStorage/sessionStorage
+      2. On each request: include in Authorization header
+      3. Error 401: clear the token and redirect to login
+      4. On logout: remove the token on the client side
 
-      Gestion des erreurs CORS :
-      - Vérifier que l'origine du frontend est dans la liste blanche CORS
-      - Vérifier que les headers Content-Type et Authorization sont inclus
-      - Vérifier que le serveur inclut les headers CORS de réponse
+      CORS error handling:
+      - Verify that the frontend origin is in the CORS whitelist
+      - Verify that Content-Type and Authorization headers are included
+      - Verify that the server includes CORS response headers
 
-      Testing CORS en dev :
+      Testing CORS in dev:
       curl -H "Origin: http://localhost:3000" -H "Access-Control-Request-Method: POST" http://localhost:8080/api/v1/auth/login
 
 servers:
   - url: http://localhost:8080
-    description: Serveur local de développement
-  - url: https://aventuriers.digicrafters.fr
-    description: Serveur de production (futur)
+    description: Local development server
+  - url: https://adventurers.digicrafters.fr
+    description: Production server (future)
 
 paths:
-  /api/v1/aventurers:
+  /api/v1/adventurers:
     get:
       tags:
         - Adventurers
-      summary: Lister tous les aventuriers
+      summary: List all adventurers
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Liste des aventuriers récupérée avec succès
+          description: Adventurer list retrieved successfully
           content:
             application/json:
               schema:
@@ -129,11 +129,11 @@ paths:
                     - id: 550e8400-e29b-41d4-a716-446655440000
                       name: Aragorn
                       level: 50
-                      advClass: GUERRIER
+                      advClass: WARRIOR
                       physical: 45
                       mental: 35
                       perception: 40
-                      description: Un grand guerrier légendaire
+                      description: A great legendary warrior
                     - id: 550e8400-e29b-41d4-a716-446655440001
                       name: Gandalf
                       level: 60
@@ -141,9 +141,9 @@ paths:
                       physical: 20
                       mental: 50
                       perception: 48
-                      description: Puissant magicien gris
+                      description: Powerful grey wizard
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -154,7 +154,7 @@ paths:
     post:
       tags:
         - Adventurers
-      summary: Créer un aventurier
+      summary: Create an adventurer
       security:
         - bearerAuth: []
       requestBody:
@@ -165,15 +165,15 @@ paths:
             example:
               name: Legolas
               level: 45
-              advClass: RODEUR
+              advClass: RANGER
               physical: 40
               mental: 30
               perception: 48
-              description: Archer elfe légendaire
+              description: Legendary elf archer
         required: true
       responses:
         '201':
-          description: Aventurier créé avec succès
+          description: Adventurer created successfully
           content:
             application/json:
               schema:
@@ -181,7 +181,7 @@ paths:
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -192,12 +192,12 @@ paths:
           $ref: '#/components/responses/ServerError'
       operationId: createAdventurer
 
-  /api/v1/competences:
+  /api/v1/skills:
     get:
       tags:
-        - Competences
-      summary: Lister toutes les compétences
-      description: Récupère la liste paginée de toutes les compétences avec leurs prérequis
+        - Skills
+      summary: List all skills
+      description: Retrieves the paginated list of all skills with their prerequisites
       security:
         - bearerAuth: []
       parameters:
@@ -207,17 +207,17 @@ paths:
             type: integer
             minimum: 0
             default: 0
-          description: Numéro de page (0-indexed)
+          description: Page number (0-indexed)
         - name: size
           in: query
           schema:
             type: integer
             minimum: 1
             default: 20
-          description: Nombre d'éléments par page
+          description: Number of elements per page
       responses:
         '200':
-          description: Liste paginée des compétences
+          description: Paginated list of skills
           content:
             application/json:
               schema:
@@ -226,7 +226,7 @@ paths:
                   content:
                     type: array
                     items:
-                      $ref: '#/components/schemas/CompetenceDto'
+                      $ref: '#/components/schemas/SkillDto'
                   totalElements:
                     type: integer
                   totalPages:
@@ -234,54 +234,54 @@ paths:
                   currentPage:
                     type: integer
         '401':
-          description: Non authentifié
+          description: Unauthenticated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: listCompetences
+      operationId: listSkills
     post:
       tags:
-        - Competences
-      summary: Créer une compétence
-      description: Créer une nouvelle compétence avec ses prérequis. Les UUID des compétences requises doivent exister.
+        - Skills
+      summary: Create a skill
+      description: Create a new skill with its prerequisites. UUIDs of required skills must exist.
       security:
         - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompetencePayload'
+              $ref: '#/components/schemas/SkillPayload'
             example:
-              nom: Coup Critique
-              description: Infliger des dégâts amplifiés
-              classeRequise: GUERRIER
-              niveauMinimum: 10
-              caracteristiqueMin:
-                caracteristique: physical
-                valeur: 30
-              competencesRequises:
+              name: Critical Strike
+              description: Inflict amplified damage
+              classRequired: WARRIOR
+              minimumLevel: 10
+              attributeMin:
+                attribute: physical
+                value: 30
+              skillsRequired:
                 - 550e8400-e29b-41d4-a716-446655440000
         required: true
       responses:
         '201':
-          description: Compétence créée avec succès
+          description: Skill created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompetenceDto'
+                $ref: '#/components/schemas/SkillDto'
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
-          description: Non authentifié ou permissions insuffisantes
+          description: Unauthenticated or insufficient permissions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Accès refusé - Rôle ADMIN requis
+          description: Access denied - ADMIN role required
           content:
             application/json:
               schema:
@@ -290,24 +290,24 @@ paths:
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: createCompetence
-  /api/v1/competences/{id}:
+      operationId: createSkill
+  /api/v1/skills/{id}:
     get:
       tags:
-        - Competences
-      summary: Consulter le détail d'une compétence
-      description: Récupère les informations détaillées d'une compétence incluant tous ses prérequis résolus
+        - Skills
+      summary: Get skill details
+      description: Retrieves detailed information about a skill including all its resolved prerequisites
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Détail de la compétence
+          description: Skill details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompetenceDto'
+                $ref: '#/components/schemas/SkillDto'
         '401':
-          description: Non authentifié
+          description: Unauthenticated
           content:
             application/json:
               schema:
@@ -316,37 +316,37 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: getCompetence
+      operationId: getSkill
     put:
       tags:
-        - Competences
-      summary: Modifier une compétence
-      description: Modifie les prérequis d'une compétence. Rejetée si des aventuriers la possèdent déjà et ne satisferaient plus les nouveaux prérequis (Règle 2).
+        - Skills
+      summary: Update a skill
+      description: Modifies a skill's prerequisites. Rejected if adventurers who possess it would no longer meet the new prerequisites (Rule 2).
       security:
         - bearerAuth: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompetencePayload'
+              $ref: '#/components/schemas/SkillPayload'
         required: true
       responses:
         '200':
-          description: Compétence modifiée avec succès
+          description: Skill updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompetenceDto'
+                $ref: '#/components/schemas/SkillDto'
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
-          description: Non authentifié ou permissions insuffisantes
+          description: Unauthenticated or insufficient permissions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Accès refusé - Rôle ADMIN requis
+          description: Access denied - ADMIN role required
           content:
             application/json:
               schema:
@@ -354,41 +354,41 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Conflit - Aventuriers invalides. Les nouveaux prérequis invalideraient des aventuriers qui possèdent déjà cette compétence.
+          description: Conflict - Invalid adventurers. New prerequisites would invalidate adventurers who already possess this skill.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictError'
               example:
                 status: 409
-                message: Les aventuriers suivants ne satisfont plus les prérequis
-                aventuriersInvalides:
+                message: The following adventurers no longer meet the prerequisites
+                invalidAdventurers:
                   - id: 550e8400-e29b-41d4-a716-446655440000
-                    nom: Aragorn
-                    raison: Niveau insuffisant
+                    name: Aragorn
+                    reason: Insufficient level
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: updateCompetence
+      operationId: updateSkill
     delete:
       tags:
-        - Competences
-      summary: Supprimer une compétence
-      description: Supprime une compétence uniquement si aucun aventurier ne la possède (Règle 3).
+        - Skills
+      summary: Delete a skill
+      description: Deletes a skill only if no adventurer possesses it (Rule 3).
       security:
         - bearerAuth: []
       responses:
         '204':
-          description: Compétence supprimée avec succès
+          description: Skill deleted successfully
         '401':
-          description: Non authentifié ou permissions insuffisantes
+          description: Unauthenticated or insufficient permissions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Accès refusé - Rôle ADMIN requis
+          description: Access denied - ADMIN role required
           content:
             application/json:
               schema:
@@ -396,19 +396,19 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          description: Conflit - Des aventuriers possèdent cette compétence
+          description: Conflict - Adventurers possess this skill
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
                 status: 409
-                message: Impossible de supprimer une compétence possédée par des aventuriers
+                message: Cannot delete a skill possessed by adventurers
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: deleteCompetence
+      operationId: deleteSkill
     parameters:
       - name: id
         schema:
@@ -416,23 +416,23 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de la compétence
-  /api/v1/aventurers/{id}:
+        description: Unique UUID of the skill
+  /api/v1/adventurers/{id}:
     get:
       tags:
         - Adventurers
-      summary: Consulter un aventurier
+      summary: Get an adventurer
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Aventurier trouvé
+          description: Adventurer found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdventurerDto'
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -445,7 +445,7 @@ paths:
     put:
       tags:
         - Adventurers
-      summary: Modifier un aventurier
+      summary: Update an adventurer
       security:
         - bearerAuth: []
       requestBody:
@@ -456,15 +456,15 @@ paths:
             example:
               name: Legolas
               level: 48
-              advClass: RODEUR
+              advClass: RANGER
               physical: 42
               mental: 30
               perception: 50
-              description: Archer elfe légendaire - Expérimenté
+              description: Legendary elf archer - Experienced
         required: true
       responses:
         '200':
-          description: Aventurier modifié avec succès
+          description: Adventurer updated successfully
           content:
             application/json:
               schema:
@@ -472,7 +472,7 @@ paths:
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -487,14 +487,14 @@ paths:
     delete:
       tags:
         - Adventurers
-      summary: Supprimer un aventurier
+      summary: Delete an adventurer
       security:
         - bearerAuth: []
       responses:
         '204':
-          description: Aventurier supprimé avec succès
+          description: Adventurer deleted successfully
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -513,27 +513,27 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de l'aventurier
+        description: Unique UUID of the adventurer
 
-  /api/v1/aventurers/{id}/competences:
+  /api/v1/adventurers/{id}/skills:
     get:
       tags:
-        - Aventurers Competences
-      summary: Lister les compétences d'un aventurier
-      description: Récupère toutes les compétences actuellement acquises par un aventurier
+        - Adventurers Skills
+      summary: List adventurer skills
+      description: Retrieves all skills currently acquired by an adventurer
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Liste des compétences de l'aventurier
+          description: List of adventurer skills
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CompetenceDto'
+                  $ref: '#/components/schemas/SkillDto'
         '401':
-          description: Non authentifié
+          description: Unauthenticated
           content:
             application/json:
               schema:
@@ -542,7 +542,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: listAdventurerCompetences
+      operationId: listAdventurerSkills
     parameters:
       - name: id
         schema:
@@ -550,106 +550,106 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de l'aventurier
-  /api/v1/aventurers/{id}/competences/{competenceId}:
+        description: Unique UUID of the adventurer
+  /api/v1/adventurers/{id}/skills/{skillId}:
     post:
       tags:
-        - Aventurers Competences
-      summary: Ajouter une compétence à un aventurier
-      description: Attribue une compétence à un aventurier après vérification de tous les prérequis (Règle 1). Si un prérequis n'est pas satisfait, retourne 422 avec le détail.
+        - Adventurers Skills
+      summary: Add a skill to an adventurer
+      description: Assigns a skill to an adventurer after verifying all prerequisites (Rule 1). If a prerequisite is not met, returns 422 with details.
       security:
         - bearerAuth: []
       responses:
         '201':
-          description: Compétence attribuée avec succès
+          description: Skill assigned successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompetenceDto'
+                $ref: '#/components/schemas/SkillDto'
         '401':
-          description: Non authentifié ou permissions insuffisantes
+          description: Unauthenticated or insufficient permissions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Accès refusé - Rôle ADMIN requis
+          description: Access denied - ADMIN role required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Aventurier ou compétence non trouvé
+          description: Adventurer or skill not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: Conflit - Compétence déjà possédée par l'aventurier
+          description: Conflict - Skill already possessed by the adventurer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '422':
-          description: Entité non traitable - Prérequis non satisfaits
+          description: Unprocessable entity - Prerequisites not met
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnprocessableEntityError'
               example:
                 status: 422
-                message: Les prérequis ne sont pas satisfaits
-                prerequisNonSatisfait:
-                  type: niveauMinimum
-                  detail: Niveau minimum requis 20, niveau actuel 15
+                message: Prerequisites are not met
+                unmetPrerequisite:
+                  type: minimumLevel
+                  detail: Minimum level required 20, current level 15
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: addCompetenceToAdventurer
+      operationId: addSkillToAdventurer
     delete:
       tags:
-        - Aventurers Competences
-      summary: Retirer une compétence à un aventurier
-      description: Retire une compétence d'un aventurier. Le retrait est bloqué si cette compétence est un prérequis d'une autre compétence déjà possédée (Règle 3).
+        - Adventurers Skills
+      summary: Remove a skill from an adventurer
+      description: Removes a skill from an adventurer. Removal is blocked if this skill is a prerequisite of another skill already possessed (Rule 3).
       security:
         - bearerAuth: []
       responses:
         '204':
-          description: Compétence retirée avec succès
+          description: Skill removed successfully
         '401':
-          description: Non authentifié ou permissions insuffisantes
+          description: Unauthenticated or insufficient permissions
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Accès refusé - Rôle ADMIN requis
+          description: Access denied - ADMIN role required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Aventurier ou compétence non trouvé
+          description: Adventurer or skill not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: Conflit - La compétence est requise par une autre compétence possédée
+          description: Conflict - Skill is required by another possessed skill
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictError'
               example:
                 status: 409
-                message: Impossible de retirer cette compétence
-                detail: Cette compétence est un prérequis de Coup Critique
+                message: Cannot remove this skill
+                detail: This skill is a prerequisite of Critical Strike
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: removeCompetenceFromAdventurer
+      operationId: removeSkillFromAdventurer
     parameters:
       - name: id
         schema:
@@ -657,31 +657,31 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de l'aventurier
-      - name: competenceId
+        description: Unique UUID of the adventurer
+      - name: skillId
         schema:
           format: uuid
           type: string
         in: path
         required: true
-        description: UUID unique de la compétence
-  /api/v1/aventurers/{id}/competences/disponibles:
+        description: Unique UUID of the skill
+  /api/v1/adventurers/{id}/skills/available:
     get:
       tags:
-        - Aventurers Competences
-      summary: Compétences disponibles et bloquées pour un aventurier
-      description: Retourne deux listes - acquérables (prérequis satisfaits) et bloquées (prérequis manquants) pour cet aventurier
+        - Adventurers Skills
+      summary: Available and locked skills for an adventurer
+      description: Returns two lists - acquirable (prerequisites met) and locked (missing prerequisites) for this adventurer
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Compétences disponibles et bloquées
+          description: Available and locked skills
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompetencesDisponiblesResponse'
+                $ref: '#/components/schemas/AvailableSkillsResponse'
         '401':
-          description: Non authentifié
+          description: Unauthenticated
           content:
             application/json:
               schema:
@@ -690,7 +690,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: listCompetencesDisponibles
+      operationId: listAvailableSkills
     parameters:
       - name: id
         schema:
@@ -698,24 +698,24 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de l'aventurier
-  /api/v1/competences/{id}/aventurers:
+        description: Unique UUID of the adventurer
+  /api/v1/skills/{id}/adventurers:
     get:
       tags:
-        - Competences
-      summary: Aventuriers liés à une compétence
-      description: Retourne deux listes - possesseurs (qui possèdent déjà la compétence) et éligibles (qui pourraient l'acquérir maintenant)
+        - Skills
+      summary: Adventurers linked to a skill
+      description: Returns two lists - owners (who already possess the skill) and eligible (who could acquire it now)
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Aventuriers possesseurs et éligibles
+          description: Owners and eligible adventurers
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AventuriersLiesResponse'
+                $ref: '#/components/schemas/LinkedAdventurersResponse'
         '401':
-          description: Non authentifié
+          description: Unauthenticated
           content:
             application/json:
               schema:
@@ -724,7 +724,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-      operationId: listAventurersLinkedToCompetence
+      operationId: listLinkedAdventurers
     parameters:
       - name: id
         schema:
@@ -732,22 +732,22 @@ paths:
           type: string
         in: path
         required: true
-        description: UUID unique de la compétence
+        description: Unique UUID of the skill
 
   /api/v1/auth/login:
     post:
       tags:
         - Authentication
-      summary: Connexion utilisateur
-      description: Authentifier un utilisateur et obtenir un token JWT
+      summary: User login
+      description: Authenticate a user and get a JWT token
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/UserCredentials'
             example:
-              username: aventurier
-              password: motdepasse123
+              username: adventurer
+              password: password123
         required: true
       responses:
         '200':
@@ -755,7 +755,7 @@ paths:
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '401':
-          description: Identifiants invalides
+          description: Invalid credentials
           content:
             application/json:
               schema:
@@ -767,16 +767,16 @@ paths:
     post:
       tags:
         - Authentication
-      summary: Inscription utilisateur
-      description: Créer un nouveau compte utilisateur et obtenir un token JWT
+      summary: User registration
+      description: Create a new user account and get a JWT token
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterCredentials'
             example:
-              username: aventurier_nouveau
-              password: motdepasse123
+              username: new_adventurer
+              password: password123
         required: true
       responses:
         '201':
@@ -784,7 +784,7 @@ paths:
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '409':
-          description: Utilisateur déjà existant
+          description: User already exists
           content:
             application/json:
               schema:
@@ -796,15 +796,15 @@ paths:
     post:
       tags:
         - Authentication
-      summary: Déconnexion utilisateur
-      description: Déconnecter l'utilisateur actuel en supprimant sa session. Le token JWT reste valide côté serveur jusqu'à expiration (architecture stateless), la suppression doit être gérée côté client.
+      summary: User logout
+      description: Logout the current user by terminating the session. The JWT token remains valid on the server until expiration (stateless architecture), token removal must be handled on the client side.
       security:
         - bearerAuth: []
       responses:
         '204':
-          description: Déconnexion réussie - Session terminée
+          description: Logout successful - Session terminated
         '401':
-          description: Non authentifié - Token JWT manquant ou invalide
+          description: Unauthenticated - Missing or invalid JWT token
           content:
             application/json:
               schema:
@@ -819,7 +819,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Token JWT pour authentification
+      description: JWT token for authentication
 
   schemas:
     Error:
@@ -830,12 +830,12 @@ components:
       properties:
         status:
           type: integer
-          description: Code de statut HTTP
+          description: HTTP status code
         message:
           type: string
-          description: Message d'erreur détaillé
+          description: Detailed error message
     AdventurerDto:
-      description: Représentation complète d'un aventurier avec tous ses attributs
+      description: Complete representation of an adventurer with all its attributes
       allOf:
         - required:
             - id
@@ -844,7 +844,7 @@ components:
             id:
               type: string
               format: uuid
-              description: Identifiant unique de l'aventurier
+              description: Unique identifier of the adventurer
         - $ref: '#/components/schemas/AdventurerPayload'
     AdventurerPayload:
       required:
@@ -860,48 +860,48 @@ components:
           type: string
           minLength: 3
           maxLength: 100
-          description: Nom de l'aventurier
+          description: Name of the adventurer
         level:
           type: integer
           minimum: 1
           maximum: 100
-          description: Niveau d'expérience (1-100)
+          description: Experience level (1-100)
         advClass:
           type: string
           enum:
-            - GUERRIER
+            - WARRIOR
             - MAGE
-            - RODEUR
-            - VOLEUR
-            - CLERC
-            - BARDE
-            - DRUIDE
+            - RANGER
+            - ROGUE
+            - CLERIC
+            - BARD
+            - DRUID
             - PALADIN
-            - BARBARE
-            - MOINE
-          description: Classe de l'aventurier
+            - BARBARIAN
+            - MONK
+          description: Class of the adventurer
         physical:
           type: integer
           minimum: 1
           maximum: 50
-          description: Attribut physique (1-50)
+          description: Physical attribute (1-50)
         mental:
           type: integer
           minimum: 1
           maximum: 50
-          description: Attribut mental (1-50)
+          description: Mental attribute (1-50)
         perception:
           type: integer
           minimum: 1
           maximum: 50
-          description: Attribut perception (1-50)
+          description: Perception attribute (1-50)
         description:
           type: string
           maxLength: 500
-          description: Description optionnelle de l'aventurier
+          description: Optional description of the adventurer
     UserCredentials:
-      title: Identifiants utilisateur
-      description: Identifiants pour l'authentification
+      title: User credentials
+      description: Credentials for authentication
       required:
         - username
         - password
@@ -911,14 +911,14 @@ components:
           type: string
           minLength: 3
           maxLength: 50
-          description: Nom d'utilisateur unique
+          description: Unique username
         password:
           type: string
           minLength: 6
-          description: Mot de passe sécurisé (minimum 6 caractères)
+          description: Secure password (minimum 6 characters)
     LoginData:
-      title: Données de connexion
-      description: Réponse renvoyée après une authentification réussie
+      title: Login data
+      description: Response returned after successful authentication
       required:
         - token
         - role
@@ -927,19 +927,19 @@ components:
         token:
           type: string
           format: jwt
-          description: Token JWT pour l'authentification des requêtes suivantes
+          description: JWT token for authenticating subsequent requests
         role:
           type: string
           enum:
             - ADMIN
             - VIEWER
-          description: Rôle de l'utilisateur
+          description: User role
       example:
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
         role: VIEWER
     RegisterCredentials:
-      title: Données d'inscription
-      description: Données requises pour créer un nouveau compte
+      title: Registration data
+      description: Data required to create a new account
       required:
         - username
         - password
@@ -949,155 +949,155 @@ components:
           type: string
           minLength: 3
           maxLength: 50
-          description: Nom d'utilisateur unique
+          description: Unique username
         password:
           type: string
           minLength: 6
-          description: Mot de passe sécurisé (minimum 6 caractères)
-    CaracteristiqueMin:
-      title: Exigence de caractéristique minimale
-      description: Définit une caractéristique et sa valeur minimale requise
+          description: Secure password (minimum 6 characters)
+    AttributeMin:
+      title: Minimum attribute requirement
+      description: Defines an attribute and its minimum required value
       type: object
       properties:
-        caracteristique:
+        attribute:
           type: string
           enum:
             - physical
             - mental
             - perception
-          description: Nom de la caractéristique requise
-        valeur:
+          description: Name of the required attribute
+        value:
           type: integer
           minimum: 1
           maximum: 50
-          description: Valeur minimale requise pour cette caractéristique
+          description: Minimum required value for this attribute
       example:
-        caracteristique: physical
-        valeur: 25
+        attribute: physical
+        value: 25
 
-    Prerequis:
-      title: Prérequis d'une compétence
-      description: Ensemble des conditions que doit remplir un aventurier pour acquérir une compétence. Si tous les champs sont null/vides, la compétence est accessible à tous.
+    Prerequisite:
+      title: Skill prerequisites
+      description: Set of conditions an adventurer must meet to acquire a skill. If all fields are null/empty, the skill is accessible to everyone.
       type: object
       properties:
-        classeRequise:
+        classRequired:
           type: string
           enum:
-            - GUERRIER
+            - WARRIOR
             - MAGE
-            - RODEUR
-            - VOLEUR
-            - CLERC
-            - BARDE
-            - DRUIDE
+            - RANGER
+            - ROGUE
+            - CLERIC
+            - BARD
+            - DRUID
             - PALADIN
-            - BARBARE
-            - MOINE
+            - BARBARIAN
+            - MONK
           nullable: true
-          description: Classe requise (null = accessible à toutes les classes)
-        niveauMinimum:
+          description: Required class (null = accessible to all classes)
+        minimumLevel:
           type: integer
           minimum: 1
           maximum: 100
           nullable: true
-          description: Niveau minimum requis (null = aucune exigence de niveau)
-        caracteristiqueMin:
-          $ref: '#/components/schemas/CaracteristiqueMin'
+          description: Minimum level required (null = no level requirement)
+        attributeMin:
+          $ref: '#/components/schemas/AttributeMin'
           nullable: true
-          description: Exigence minimale pour une caractéristique spécifique (null = pas d'exigence)
-        competencesRequises:
+          description: Minimum attribute requirement for a specific attribute (null = no requirement)
+        skillsRequired:
           type: array
           items:
-            $ref: '#/components/schemas/CompetenceReference'
-          description: Liste des compétences qui doivent être déjà acquises (liste vide = pas de dépendances)
-    CompetenceReference:
-      title: Référence à une compétence
-      description: Référence minimale à une compétence (utilisée dans les prérequis et les réponses)
+            $ref: '#/components/schemas/SkillReference'
+          description: List of skills that must already be acquired (empty list = no dependencies)
+    SkillReference:
+      title: Skill reference
+      description: Minimal reference to a skill (used in prerequisites and responses)
       required:
         - id
-        - nom
+        - name
       type: object
       properties:
         id:
           type: string
           format: uuid
-          description: UUID unique de la compétence
-        nom:
+          description: Unique UUID of the skill
+        name:
           type: string
-          description: Nom de la compétence
-    CompetencePayload:
-      title: Données pour créer/modifier une compétence
-      description: Ensemble des données requises pour créer ou modifier une compétence
+          description: Name of the skill
+    SkillPayload:
+      title: Skill data
+      description: Data required to create or modify a skill
       required:
-        - nom
+        - name
       type: object
       properties:
-        nom:
+        name:
           type: string
           minLength: 3
           maxLength: 100
-          description: Nom unique de la compétence
+          description: Unique name of the skill
         description:
           type: string
           maxLength: 500
-          description: Description détaillée de la compétence et ses effets
-        classeRequise:
+          description: Detailed description of the skill and its effects
+        classRequired:
           type: string
           enum:
-            - GUERRIER
+            - WARRIOR
             - MAGE
-            - RODEUR
-            - VOLEUR
-            - CLERC
-            - BARDE
-            - DRUIDE
+            - RANGER
+            - ROGUE
+            - CLERIC
+            - BARD
+            - DRUID
             - PALADIN
-            - BARBARE
-            - MOINE
+            - BARBARIAN
+            - MONK
           nullable: true
-          description: Classe requise (null = accessible à toutes les classes)
-        niveauMinimum:
+          description: Required class (null = accessible to all classes)
+        minimumLevel:
           type: integer
           minimum: 1
           maximum: 100
           nullable: true
-          description: Niveau minimum requis (null = aucune exigence de niveau)
-        caracteristiqueMin:
-          $ref: '#/components/schemas/CaracteristiqueMin'
+          description: Minimum level required (null = no level requirement)
+        attributeMin:
+          $ref: '#/components/schemas/AttributeMin'
           nullable: true
-          description: Exigence minimale pour une caractéristique spécifique
-        competencesRequises:
+          description: Minimum attribute requirement for a specific attribute
+        skillsRequired:
           type: array
           items:
             type: string
             format: uuid
-          description: Liste des UUID des compétences requises comme prérequis
-    CompetenceDto:
-      title: Compétence détaillée
-      description: Représentation complète d'une compétence avec tous ses prérequis résolus
+          description: List of UUIDs of required skills as prerequisites
+    SkillDto:
+      title: Detailed skill
+      description: Complete representation of a skill with all its resolved prerequisites
       required:
         - id
-        - nom
-        - prerequis
+        - name
+        - prerequisite
       type: object
       properties:
         id:
           type: string
           format: uuid
-          description: UUID unique de la compétence
-        nom:
+          description: Unique UUID of the skill
+        name:
           type: string
-          description: Nom de la compétence
+          description: Name of the skill
         description:
           type: string
-          description: Description de la compétence et ses effets
-        prerequis:
-          $ref: '#/components/schemas/Prerequis'
-          description: Tous les prérequis pour acquérir cette compétence
+          description: Description of the skill and its effects
+        prerequisite:
+          $ref: '#/components/schemas/Prerequisite'
+          description: All prerequisites to acquire this skill
 
     ConflictError:
-      title: Erreur de conflit avec détails
-      description: Erreur retournée quand une opération créerait une incohérence métier
+      title: Conflict error with details
+      description: Error returned when an operation would create a business inconsistency
       required:
         - status
         - message
@@ -1106,15 +1106,15 @@ components:
         status:
           type: integer
           example: 409
-          description: Code de statut HTTP
+          description: HTTP status code
         message:
           type: string
-          description: Message d'erreur principal
+          description: Main error message
         detail:
           type: string
           nullable: true
-          description: Détail supplémentaire sur le conflit
-        aventuriersInvalides:
+          description: Additional detail about the conflict
+        invalidAdventurers:
           type: array
           nullable: true
           items:
@@ -1123,14 +1123,14 @@ components:
               id:
                 type: string
                 format: uuid
-              nom:
+              name:
                 type: string
-              raison:
+              reason:
                 type: string
-          description: Liste des aventuriers affectés par l'incohérence (pour modification/suppression)
+          description: List of affected adventurers by the inconsistency (for update/delete)
     UnprocessableEntityError:
-      title: Erreur de prérequis non satisfait
-      description: Détails sur le prérequis manquant lors de l'attribution d'une compétence
+      title: Unmet prerequisite error
+      description: Details about the missing prerequisite when assigning a skill
       required:
         - status
         - message
@@ -1139,43 +1139,43 @@ components:
         status:
           type: integer
           example: 422
-          description: Code de statut HTTP
+          description: HTTP status code
         message:
           type: string
-          description: Message d'erreur principal
-        prerequisNonSatisfait:
+          description: Main error message
+        unmetPrerequisite:
           type: object
           properties:
             type:
               type: string
               enum:
-                - classeRequise
-                - niveauMinimum
-                - caracteristiqueMin
-                - competencesRequises
-              description: Type de prérequis non satisfait
+                - classRequired
+                - minimumLevel
+                - attributeMin
+                - skillsRequired
+              description: Type of unmet prerequisite
             detail:
               type: string
-              description: Description détaillée du prérequis manquant
+              description: Detailed description of the missing prerequisite
 
-    CompetencesDisponiblesResponse:
-      title: Compétences disponibles et bloquées
-      description: Deux listes de compétences pour un aventurier - celles acquérables et celles bloquées
+    AvailableSkillsResponse:
+      title: Available and locked skills
+      description: Two lists of skills for an adventurer - those that are acquirable and those that are locked
       type: object
       properties:
-        acquérables:
+        acquirable:
           type: array
           items:
-            $ref: '#/components/schemas/CompetenceDto'
-          description: Compétences non encore acquises dont tous les prérequis sont satisfaits
-        bloquées:
+            $ref: '#/components/schemas/SkillDto'
+          description: Skills not yet acquired whose all prerequisites are met
+        locked:
           type: array
           items:
             type: object
             properties:
-              competence:
-                $ref: '#/components/schemas/CompetenceReference'
-              prerequisManquants:
+              skill:
+                $ref: '#/components/schemas/SkillReference'
+              unmetPrerequisites:
                 type: array
                 items:
                   type: object
@@ -1183,81 +1183,81 @@ components:
                     type:
                       type: string
                       enum:
-                        - classeRequise
-                        - niveauMinimum
-                        - caracteristiqueMin
-                        - competencesRequises
+                        - classRequired
+                        - minimumLevel
+                        - attributeMin
+                        - skillsRequired
                     detail:
                       type: string
-          description: Compétences non acquises avec la liste de leurs prérequis non satisfaits
-    AventuriersLiesResponse:
-      title: Aventuriers liés à une compétence
-      description: Deux listes d'aventuriers pour une compétence - ceux qui la possèdent et ceux qui pourraient l'acquérir
+          description: Skills not acquired with the list of their unmet prerequisites
+    LinkedAdventurersResponse:
+      title: Adventurers linked to a skill
+      description: Two lists of adventurers for a skill - those who possess it and those who could acquire it
       type: object
       properties:
-        possesseurs:
+        owners:
           type: array
           items:
             $ref: '#/components/schemas/AdventurerDto'
-          description: Aventuriers qui possèdent déjà cette compétence
-        éligibles:
+          description: Adventurers who already possess this skill
+        eligible:
           type: array
           items:
             $ref: '#/components/schemas/AdventurerDto'
-          description: Aventuriers qui pourraient acquérir cette compétence maintenant (prérequis satisfaits, pas encore acquise)
+          description: Adventurers who could acquire this skill now (prerequisites met, not yet acquired)
 
   responses:
     TooManyRequests:
-      description: Trop de requêtes - Rate limit dépassé
+      description: Too many requests - Rate limit exceeded
       headers:
         X-RateLimit-Limit:
           schema:
             type: integer
-          description: Nombre maximum de requêtes autorisées pour cette fenêtre
+          description: Maximum number of allowed requests for this window
         X-RateLimit-Remaining:
           schema:
             type: integer
-          description: Nombre de requêtes restantes avant le reset
+          description: Remaining requests before reset
         X-RateLimit-Reset:
           schema:
             type: integer
-          description: Timestamp Unix du prochain reset (secondes depuis epoch)
+          description: Unix timestamp of next reset (seconds since epoch)
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             status: 429
-            message: Trop de requêtes - Réessayez après 900 secondes
+            message: Too many requests - Retry after 900 seconds
     ServerError:
-      description: Erreur interne du serveur
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             status: 500
-            message: Une erreur interne s'est produite
+            message: An internal error occurred
     NotFound:
-      description: Ressource introuvable
+      description: Resource not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             status: 404
-            message: La ressource demandée n'existe pas
+            message: The requested resource does not exist
     InvalidRequest:
-      description: Requête invalide - Les données fournies ne respectent pas les validations
+      description: Invalid request - Provided data does not meet validations
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
             status: 400
-            message: Données invalides - Vérifiez vos entrées
+            message: Invalid data - Check your input
     SuccessfulLogin:
-      description: Authentification réussie avec token JWT
+      description: Successful authentication with JWT token
       content:
         application/json:
           schema:
@@ -1268,10 +1268,10 @@ components:
 
 tags:
   - name: Adventurers
-    description: Opérations CRUD complètes pour la gestion des aventuriers
+    description: Complete CRUD operations for adventurer management
   - name: Authentication
-    description: Endpoints d'authentification et d'autorisation
-  - name: Competences
-    description: Gestion du référentiel des compétences avec prérequis et règles métier
-  - name: Aventurers Competences
-    description: Association des compétences aux aventuriers avec vérification des prérequis et des règles métier
+    description: Authentication and authorization endpoints
+  - name: Skills
+    description: Skill repository management with prerequisites and business rules
+  - name: Adventurers Skills
+    description: Association of skills to adventurers with prerequisite verification and business rules

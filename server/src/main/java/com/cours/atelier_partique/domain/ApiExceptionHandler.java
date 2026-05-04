@@ -16,7 +16,10 @@ public class ApiExceptionHandler {
         return buildProblemDetail(exception, HttpStatus.BAD_REQUEST, "Invalid request");
     }
 
-//    @ExceptionHandler
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ProblemDetail handleUserAlreadyExistsException(UserAlreadyExistsException exception) {
+        return buildProblemDetail(exception, HttpStatus.CONFLICT, "User already exists");
+    }
 
     private static @NonNull ProblemDetail buildProblemDetail(Exception ex, HttpStatus httpStatus, String title) {
         ProblemDetail problem = ProblemDetail.forStatus(httpStatus);
