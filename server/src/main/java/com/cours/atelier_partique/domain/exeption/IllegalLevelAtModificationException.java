@@ -1,4 +1,4 @@
-package com.cours.atelier_partique.domain;
+package com.cours.atelier_partique.domain.exeption;
 
 public class IllegalLevelAtModificationException extends InvalidRequestException {
     public IllegalLevelAtModificationException(int currentLevel, int targetLevel) {

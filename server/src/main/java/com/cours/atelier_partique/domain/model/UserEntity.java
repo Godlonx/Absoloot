@@ -1,4 +1,4 @@
-package com.cours.atelier_partique.infrastructure.database.models;
+package com.cours.atelier_partique.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
