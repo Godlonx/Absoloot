@@ -1,0 +1,1282 @@
+openapi: 3.0.3
+info:
+  title: API Gestion des Aventuriers
+  version: 1.0.0
+  description: API REST pour la gestion des aventuriers — création, consultation, modification et suppression.
+  contact:
+    name: Guilde des Aventuriers
+  x-rate-limit:
+    description: |
+      Rate limiting par utilisateur (identifié via JWT sub claim)
+
+      Limites par type d'opération :
+      - GET (lecture) : 1000 requêtes / 15 minutes
+      - POST (création) : 100 requêtes / 15 minutes
+      - PUT (modification) : 100 requêtes / 15 minutes
+      - DELETE (suppression) : 50 requêtes / 15 minutes
+
+      Headers de réponse :
+      - X-RateLimit-Limit : nombre maximum de requêtes autorisées
+      - X-RateLimit-Remaining : requêtes restantes avant reset
+      - X-RateLimit-Reset : timestamp Unix du prochain reset
+
+      Dépassement → HTTP 429 Too Many Requests
+  x-cors:
+    description: |
+      Configuration CORS pour intégration frontend
+
+      Origines autorisées (Development) :
+      - http://localhost:3000 (Create React App)
+      - http://localhost:5173 (Vite)
+      - http://localhost:4200 (Angular)
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:5173
+
+      Origines autorisées (Production - futur) :
+      - https://aventuriers.digicrafters.fr
+      - https://www.aventuriers.digicrafters.fr
+
+      Méthodes HTTP autorisées : GET, POST, PUT, DELETE, OPTIONS
+
+      Headers requis dans les requêtes :
+      - Content-Type: application/json
+      - Authorization: Bearer <JWT_TOKEN> (sauf login/register)
+
+      Headers exposés dans les réponses :
+      - X-RateLimit-Limit
+      - X-RateLimit-Remaining
+      - X-RateLimit-Reset
+      - Content-Type
+      - Content-Length
+
+      Credentials autorisés : true (inclus dans requêtes)
+      Max age preflight : 3600 secondes (1 heure)
+  x-api-versioning:
+    description: |
+      Stratégie de versioning : URL versioning simple
+
+      Version actuelle : v1
+
+      Pas de déprécation prévue à court terme.
+
+      Les endpoints utilisent le prefix /api/v1/ pour :
+      - Supporter les futures versions sans breaking changes
+      - Faciliter la coexistence de versions si nécessaire
+      - Maintenir une API stable pour les clients
+  x-frontend-integration:
+    description: |
+      Guide d'intégration pour le frontend
+
+      Configuration client (exemple avec fetch) :
+      ```
+      const API_BASE = 'http://localhost:8080/api/v1'
+      const token = localStorage.getItem('jwt_token')
+
+      fetch(`${API_BASE}/aventurers`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      ```
+
+      Variables d'environnement recommandées :
+      - REACT_APP_API_BASE_URL (React)
+      - VITE_API_BASE_URL (Vite)
+      - NG_APP_API_BASE_URL (Angular)
+
+      Gestion du JWT :
+      1. Après login/register : stocker le token dans localStorage/sessionStorage
+      2. Sur chaque requête : inclure dans header Authorization
+      3. Erreur 401 : nettoyer le token et rediriger vers login
+      4. Sur logout : supprimer le token côté client
+
+      Gestion des erreurs CORS :
+      - Vérifier que l'origine du frontend est dans la liste blanche CORS
+      - Vérifier que les headers Content-Type et Authorization sont inclus
+      - Vérifier que le serveur inclut les headers CORS de réponse
+
+      Testing CORS en dev :
+      curl -H "Origin: http://localhost:3000" -H "Access-Control-Request-Method: POST" http://localhost:8080/api/v1/auth/login
+
+servers:
+  - url: http://localhost:8080
+    description: Serveur local de développement
+  - url: https://aventuriers.digicrafters.fr
+    description: Serveur de production (futur)
+
+paths:
+  /api/v1/aventurers:
+    get:
+      tags:
+        - Adventurers
+      summary: Lister tous les aventuriers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des aventuriers récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdventurerDto'
+              examples:
+                response:
+                  value:
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      name: Aragorn
+                      level: 50
+                      advClass: GUERRIER
+                      physical: 45
+                      mental: 35
+                      perception: 40
+                      description: Un grand guerrier légendaire
+                    - id: 550e8400-e29b-41d4-a716-446655440001
+                      name: Gandalf
+                      level: 60
+                      advClass: MAGE
+                      physical: 20
+                      mental: 50
+                      perception: 48
+                      description: Puissant magicien gris
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: listAdventurer
+    post:
+      tags:
+        - Adventurers
+      summary: Créer un aventurier
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdventurerPayload'
+            example:
+              name: Legolas
+              level: 45
+              advClass: RODEUR
+              physical: 40
+              mental: 30
+              perception: 48
+              description: Archer elfe légendaire
+        required: true
+      responses:
+        '201':
+          description: Aventurier créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdventurerDto'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: createAdventurer
+
+  /api/v1/competences:
+    get:
+      tags:
+        - Competences
+      summary: Lister toutes les compétences
+      description: Récupère la liste paginée de toutes les compétences avec leurs prérequis
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Numéro de page (0-indexed)
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+          description: Nombre d'éléments par page
+      responses:
+        '200':
+          description: Liste paginée des compétences
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompetenceDto'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  currentPage:
+                    type: integer
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: listCompetences
+    post:
+      tags:
+        - Competences
+      summary: Créer une compétence
+      description: Créer une nouvelle compétence avec ses prérequis. Les UUID des compétences requises doivent exister.
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetencePayload'
+            example:
+              nom: Coup Critique
+              description: Infliger des dégâts amplifiés
+              classeRequise: GUERRIER
+              niveauMinimum: 10
+              caracteristiqueMin:
+                caracteristique: physical
+                valeur: 30
+              competencesRequises:
+                - 550e8400-e29b-41d4-a716-446655440000
+        required: true
+      responses:
+        '201':
+          description: Compétence créée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetenceDto'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          description: Non authentifié ou permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé - Rôle ADMIN requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: createCompetence
+  /api/v1/competences/{id}:
+    get:
+      tags:
+        - Competences
+      summary: Consulter le détail d'une compétence
+      description: Récupère les informations détaillées d'une compétence incluant tous ses prérequis résolus
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Détail de la compétence
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetenceDto'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: getCompetence
+    put:
+      tags:
+        - Competences
+      summary: Modifier une compétence
+      description: Modifie les prérequis d'une compétence. Rejetée si des aventuriers la possèdent déjà et ne satisferaient plus les nouveaux prérequis (Règle 2).
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetencePayload'
+        required: true
+      responses:
+        '200':
+          description: Compétence modifiée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetenceDto'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          description: Non authentifié ou permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé - Rôle ADMIN requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflit - Aventuriers invalides. Les nouveaux prérequis invalideraient des aventuriers qui possèdent déjà cette compétence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+              example:
+                status: 409
+                message: Les aventuriers suivants ne satisfont plus les prérequis
+                aventuriersInvalides:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    nom: Aragorn
+                    raison: Niveau insuffisant
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: updateCompetence
+    delete:
+      tags:
+        - Competences
+      summary: Supprimer une compétence
+      description: Supprime une compétence uniquement si aucun aventurier ne la possède (Règle 3).
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Compétence supprimée avec succès
+        '401':
+          description: Non authentifié ou permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé - Rôle ADMIN requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflit - Des aventuriers possèdent cette compétence
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                status: 409
+                message: Impossible de supprimer une compétence possédée par des aventuriers
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: deleteCompetence
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de la compétence
+  /api/v1/aventurers/{id}:
+    get:
+      tags:
+        - Adventurers
+      summary: Consulter un aventurier
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aventurier trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdventurerDto'
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: getAdventurer
+    put:
+      tags:
+        - Adventurers
+      summary: Modifier un aventurier
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdventurerPayload'
+            example:
+              name: Legolas
+              level: 48
+              advClass: RODEUR
+              physical: 42
+              mental: 30
+              perception: 50
+              description: Archer elfe légendaire - Expérimenté
+        required: true
+      responses:
+        '200':
+          description: Aventurier modifié avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdventurerDto'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: updateAdventurer
+    delete:
+      tags:
+        - Adventurers
+      summary: Supprimer un aventurier
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Aventurier supprimé avec succès
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: deleteAdventurer
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de l'aventurier
+
+  /api/v1/aventurers/{id}/competences:
+    get:
+      tags:
+        - Aventurers Competences
+      summary: Lister les compétences d'un aventurier
+      description: Récupère toutes les compétences actuellement acquises par un aventurier
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des compétences de l'aventurier
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompetenceDto'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: listAdventurerCompetences
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de l'aventurier
+  /api/v1/aventurers/{id}/competences/{competenceId}:
+    post:
+      tags:
+        - Aventurers Competences
+      summary: Ajouter une compétence à un aventurier
+      description: Attribue une compétence à un aventurier après vérification de tous les prérequis (Règle 1). Si un prérequis n'est pas satisfait, retourne 422 avec le détail.
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Compétence attribuée avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetenceDto'
+        '401':
+          description: Non authentifié ou permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé - Rôle ADMIN requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Aventurier ou compétence non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflit - Compétence déjà possédée par l'aventurier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Entité non traitable - Prérequis non satisfaits
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntityError'
+              example:
+                status: 422
+                message: Les prérequis ne sont pas satisfaits
+                prerequisNonSatisfait:
+                  type: niveauMinimum
+                  detail: Niveau minimum requis 20, niveau actuel 15
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: addCompetenceToAdventurer
+    delete:
+      tags:
+        - Aventurers Competences
+      summary: Retirer une compétence à un aventurier
+      description: Retire une compétence d'un aventurier. Le retrait est bloqué si cette compétence est un prérequis d'une autre compétence déjà possédée (Règle 3).
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Compétence retirée avec succès
+        '401':
+          description: Non authentifié ou permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé - Rôle ADMIN requis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Aventurier ou compétence non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflit - La compétence est requise par une autre compétence possédée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+              example:
+                status: 409
+                message: Impossible de retirer cette compétence
+                detail: Cette compétence est un prérequis de Coup Critique
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: removeCompetenceFromAdventurer
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de l'aventurier
+      - name: competenceId
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de la compétence
+  /api/v1/aventurers/{id}/competences/disponibles:
+    get:
+      tags:
+        - Aventurers Competences
+      summary: Compétences disponibles et bloquées pour un aventurier
+      description: Retourne deux listes - acquérables (prérequis satisfaits) et bloquées (prérequis manquants) pour cet aventurier
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Compétences disponibles et bloquées
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompetencesDisponiblesResponse'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: listCompetencesDisponibles
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de l'aventurier
+  /api/v1/competences/{id}/aventurers:
+    get:
+      tags:
+        - Competences
+      summary: Aventuriers liés à une compétence
+      description: Retourne deux listes - possesseurs (qui possèdent déjà la compétence) et éligibles (qui pourraient l'acquérir maintenant)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aventuriers possesseurs et éligibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AventuriersLiesResponse'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: listAventurersLinkedToCompetence
+    parameters:
+      - name: id
+        schema:
+          format: uuid
+          type: string
+        in: path
+        required: true
+        description: UUID unique de la compétence
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Connexion utilisateur
+      description: Authentifier un utilisateur et obtenir un token JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+            example:
+              username: aventurier
+              password: motdepasse123
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessfulLogin'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          description: Identifiants invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: login
+  /api/v1/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Inscription utilisateur
+      description: Créer un nouveau compte utilisateur et obtenir un token JWT
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCredentials'
+            example:
+              username: aventurier_nouveau
+              password: motdepasse123
+        required: true
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessfulLogin'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '409':
+          description: Utilisateur déjà existant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: register
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Déconnexion utilisateur
+      description: Déconnecter l'utilisateur actuel en supprimant sa session. Le token JWT reste valide côté serveur jusqu'à expiration (architecture stateless), la suppression doit être gérée côté client.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Déconnexion réussie - Session terminée
+        '401':
+          description: Non authentifié - Token JWT manquant ou invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: logout
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT pour authentification
+
+  schemas:
+    Error:
+      required:
+        - status
+        - message
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Code de statut HTTP
+        message:
+          type: string
+          description: Message d'erreur détaillé
+    AdventurerDto:
+      description: Représentation complète d'un aventurier avec tous ses attributs
+      allOf:
+        - required:
+            - id
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Identifiant unique de l'aventurier
+        - $ref: '#/components/schemas/AdventurerPayload'
+    AdventurerPayload:
+      required:
+        - name
+        - physical
+        - mental
+        - perception
+        - level
+        - advClass
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Nom de l'aventurier
+        level:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Niveau d'expérience (1-100)
+        advClass:
+          type: string
+          enum:
+            - GUERRIER
+            - MAGE
+            - RODEUR
+            - VOLEUR
+            - CLERC
+            - BARDE
+            - DRUIDE
+            - PALADIN
+            - BARBARE
+            - MOINE
+          description: Classe de l'aventurier
+        physical:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Attribut physique (1-50)
+        mental:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Attribut mental (1-50)
+        perception:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Attribut perception (1-50)
+        description:
+          type: string
+          maxLength: 500
+          description: Description optionnelle de l'aventurier
+    UserCredentials:
+      title: Identifiants utilisateur
+      description: Identifiants pour l'authentification
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Nom d'utilisateur unique
+        password:
+          type: string
+          minLength: 6
+          description: Mot de passe sécurisé (minimum 6 caractères)
+    LoginData:
+      title: Données de connexion
+      description: Réponse renvoyée après une authentification réussie
+      required:
+        - token
+        - role
+      type: object
+      properties:
+        token:
+          type: string
+          format: jwt
+          description: Token JWT pour l'authentification des requêtes suivantes
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - VIEWER
+          description: Rôle de l'utilisateur
+      example:
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        role: VIEWER
+    RegisterCredentials:
+      title: Données d'inscription
+      description: Données requises pour créer un nouveau compte
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Nom d'utilisateur unique
+        password:
+          type: string
+          minLength: 6
+          description: Mot de passe sécurisé (minimum 6 caractères)
+    CaracteristiqueMin:
+      title: Exigence de caractéristique minimale
+      description: Définit une caractéristique et sa valeur minimale requise
+      type: object
+      properties:
+        caracteristique:
+          type: string
+          enum:
+            - physical
+            - mental
+            - perception
+          description: Nom de la caractéristique requise
+        valeur:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Valeur minimale requise pour cette caractéristique
+      example:
+        caracteristique: physical
+        valeur: 25
+
+    Prerequis:
+      title: Prérequis d'une compétence
+      description: Ensemble des conditions que doit remplir un aventurier pour acquérir une compétence. Si tous les champs sont null/vides, la compétence est accessible à tous.
+      type: object
+      properties:
+        classeRequise:
+          type: string
+          enum:
+            - GUERRIER
+            - MAGE
+            - RODEUR
+            - VOLEUR
+            - CLERC
+            - BARDE
+            - DRUIDE
+            - PALADIN
+            - BARBARE
+            - MOINE
+          nullable: true
+          description: Classe requise (null = accessible à toutes les classes)
+        niveauMinimum:
+          type: integer
+          minimum: 1
+          maximum: 100
+          nullable: true
+          description: Niveau minimum requis (null = aucune exigence de niveau)
+        caracteristiqueMin:
+          $ref: '#/components/schemas/CaracteristiqueMin'
+          nullable: true
+          description: Exigence minimale pour une caractéristique spécifique (null = pas d'exigence)
+        competencesRequises:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompetenceReference'
+          description: Liste des compétences qui doivent être déjà acquises (liste vide = pas de dépendances)
+    CompetenceReference:
+      title: Référence à une compétence
+      description: Référence minimale à une compétence (utilisée dans les prérequis et les réponses)
+      required:
+        - id
+        - nom
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID unique de la compétence
+        nom:
+          type: string
+          description: Nom de la compétence
+    CompetencePayload:
+      title: Données pour créer/modifier une compétence
+      description: Ensemble des données requises pour créer ou modifier une compétence
+      required:
+        - nom
+      type: object
+      properties:
+        nom:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Nom unique de la compétence
+        description:
+          type: string
+          maxLength: 500
+          description: Description détaillée de la compétence et ses effets
+        classeRequise:
+          type: string
+          enum:
+            - GUERRIER
+            - MAGE
+            - RODEUR
+            - VOLEUR
+            - CLERC
+            - BARDE
+            - DRUIDE
+            - PALADIN
+            - BARBARE
+            - MOINE
+          nullable: true
+          description: Classe requise (null = accessible à toutes les classes)
+        niveauMinimum:
+          type: integer
+          minimum: 1
+          maximum: 100
+          nullable: true
+          description: Niveau minimum requis (null = aucune exigence de niveau)
+        caracteristiqueMin:
+          $ref: '#/components/schemas/CaracteristiqueMin'
+          nullable: true
+          description: Exigence minimale pour une caractéristique spécifique
+        competencesRequises:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Liste des UUID des compétences requises comme prérequis
+    CompetenceDto:
+      title: Compétence détaillée
+      description: Représentation complète d'une compétence avec tous ses prérequis résolus
+      required:
+        - id
+        - nom
+        - prerequis
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID unique de la compétence
+        nom:
+          type: string
+          description: Nom de la compétence
+        description:
+          type: string
+          description: Description de la compétence et ses effets
+        prerequis:
+          $ref: '#/components/schemas/Prerequis'
+          description: Tous les prérequis pour acquérir cette compétence
+
+    ConflictError:
+      title: Erreur de conflit avec détails
+      description: Erreur retournée quand une opération créerait une incohérence métier
+      required:
+        - status
+        - message
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 409
+          description: Code de statut HTTP
+        message:
+          type: string
+          description: Message d'erreur principal
+        detail:
+          type: string
+          nullable: true
+          description: Détail supplémentaire sur le conflit
+        aventuriersInvalides:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              nom:
+                type: string
+              raison:
+                type: string
+          description: Liste des aventuriers affectés par l'incohérence (pour modification/suppression)
+    UnprocessableEntityError:
+      title: Erreur de prérequis non satisfait
+      description: Détails sur le prérequis manquant lors de l'attribution d'une compétence
+      required:
+        - status
+        - message
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 422
+          description: Code de statut HTTP
+        message:
+          type: string
+          description: Message d'erreur principal
+        prerequisNonSatisfait:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - classeRequise
+                - niveauMinimum
+                - caracteristiqueMin
+                - competencesRequises
+              description: Type de prérequis non satisfait
+            detail:
+              type: string
+              description: Description détaillée du prérequis manquant
+
+    CompetencesDisponiblesResponse:
+      title: Compétences disponibles et bloquées
+      description: Deux listes de compétences pour un aventurier - celles acquérables et celles bloquées
+      type: object
+      properties:
+        acquérables:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompetenceDto'
+          description: Compétences non encore acquises dont tous les prérequis sont satisfaits
+        bloquées:
+          type: array
+          items:
+            type: object
+            properties:
+              competence:
+                $ref: '#/components/schemas/CompetenceReference'
+              prerequisManquants:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - classeRequise
+                        - niveauMinimum
+                        - caracteristiqueMin
+                        - competencesRequises
+                    detail:
+                      type: string
+                properties:
+                  competence:
+                    $ref: '#/components/schemas/CompetenceReference'
+                  prerequisManquants:
+                    type: array
+          description: Compétences non acquises avec la liste de leurs prérequis non satisfaits
+    AventuriersLiesResponse:
+      title: Aventuriers liés à une compétence
+      description: Deux listes d'aventuriers pour une compétence - ceux qui la possèdent et ceux qui pourraient l'acquérir
+      type: object
+      properties:
+        possesseurs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdventurerDto'
+          description: Aventuriers qui possèdent déjà cette compétence
+        éligibles:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdventurerDto'
+          description: Aventuriers qui pourraient acquérir cette compétence maintenant (prérequis satisfaits, pas encore acquise)
+
+  responses:
+    TooManyRequests:
+      description: Trop de requêtes - Rate limit dépassé
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Nombre maximum de requêtes autorisées pour cette fenêtre
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Nombre de requêtes restantes avant le reset
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Timestamp Unix du prochain reset (secondes depuis epoch)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 429
+            message: Trop de requêtes - Réessayez après 900 secondes
+    ServerError:
+      description: Erreur interne du serveur
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 500
+            message: Une erreur interne s'est produite
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 404
+            message: La ressource demandée n'existe pas
+    InvalidRequest:
+      description: Requête invalide - Les données fournies ne respectent pas les validations
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            status: 400
+            message: Données invalides - Vérifiez vos entrées
+    SuccessfulLogin:
+      description: Authentification réussie avec token JWT
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginData'
+          example:
+            token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+            role: USER
+
+tags:
+  - name: Adventurers
+    description: Opérations CRUD complètes pour la gestion des aventuriers
+  - name: Authentication
+    description: Endpoints d'authentification et d'autorisation
+  - name: Competences
+    description: Gestion du référentiel des compétences avec prérequis et règles métier
+  - name: Aventurers Competences
+    description: Association des compétences aux aventuriers avec vérification des prérequis et des règles métier
