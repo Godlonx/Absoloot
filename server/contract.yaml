@@ -1189,11 +1189,6 @@ components:
                         - competencesRequises
                     detail:
                       type: string
-                properties:
-                  competence:
-                    $ref: '#/components/schemas/CompetenceReference'
-                  prerequisManquants:
-                    type: array
           description: Compétences non acquises avec la liste de leurs prérequis non satisfaits
     AventuriersLiesResponse:
       title: Aventuriers liés à une compétence

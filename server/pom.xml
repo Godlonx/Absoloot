@@ -111,7 +111,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/contract.json</inputSpec>
+							<inputSpec>${project.basedir}/contract.yaml</inputSpec>
 							<output>${openapi-generator.output}</output>
 							<generatorName>spring</generatorName>
 							<modelPackage>${openapi-generator.modelPackage}</modelPackage>
