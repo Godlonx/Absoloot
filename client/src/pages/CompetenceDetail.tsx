@@ -68,7 +68,7 @@ const CompetenceDetail = () => {
   if (error || !competence) {
     return (
       <div className="flex min-h-svh p-6">
-        <div className="flex w-full max-w-4xl flex-col gap-6">
+        <div className="flex w-full flex-col gap-6">
           <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
             {error || "Competence non trouvee."}
           </div>
@@ -95,7 +95,7 @@ const CompetenceDetail = () => {
 
   return (
     <div className="flex min-h-svh p-6">
-      <div className="flex w-full max-w-4xl flex-col gap-6">
+      <div className=" mx-auto">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{competence.nom}</h1>

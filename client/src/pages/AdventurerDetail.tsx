@@ -133,7 +133,7 @@ const AdventurerDetail = () => {
   if (!adventurer) {
     return (
       <div className="flex min-h-svh p-6">
-        <div className="flex w-full max-w-4xl flex-col gap-6">
+        <div className="flex w-full flex-col gap-6">
           <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
             Aventurier non trouve.
           </div>
@@ -147,7 +147,7 @@ const AdventurerDetail = () => {
 
   return (
     <div className="flex min-h-svh p-6">
-      <div className="flex w-full max-w-4xl flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         {error && (
           <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
             {error}
