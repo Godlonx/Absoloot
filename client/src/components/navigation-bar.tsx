@@ -25,7 +25,7 @@ const navigationLinks = [
 const NavigationBar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, role, logout } = useAuth();
+  const { isAuthenticated, role, username, isMockMode, logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -122,8 +122,18 @@ const NavigationBar = () => {
         </div>
         {/* Right side */}
         <div className="flex items-center gap-2">
+          {isMockMode && (
+            <span className="bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium">
+              MOCK
+            </span>
+          )}
           {isAuthenticated ? (
             <>
+              {username && (
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {username}
+                </span>
+              )}
               <span
                 className={
                   role === "ADMIN"
@@ -133,9 +143,11 @@ const NavigationBar = () => {
               >
                 {role}
               </span>
-              <Button variant="ghost" onClick={handleLogout}>
-                Se deconnecter
-              </Button>
+              {!isMockMode && (
+                <Button variant="ghost" onClick={handleLogout}>
+                  Se déconnecter
+                </Button>
+              )}
             </>
           ) : (
             <>

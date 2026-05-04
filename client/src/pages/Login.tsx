@@ -23,7 +23,7 @@ const Login = () => {
 
     try {
       const data = await authService.login({ username, password })
-      login(data)
+      login({ ...data, username })
       navigate("/")
     } catch (err) {
       if (err instanceof Error && err.message.includes("401")) {
