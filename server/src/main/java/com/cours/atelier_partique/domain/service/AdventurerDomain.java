@@ -1,7 +1,7 @@
-package com.cours.atelier_partique.features.aventurer;
+package com.cours.atelier_partique.domain.service;
 
-import com.cours.atelier_partique.domain.IllegalLevelAtCreationException;
-import com.cours.atelier_partique.domain.IllegalLevelAtModificationException;
+import com.cours.atelier_partique.domain.exeption.IllegalLevelAtCreationException;
+import com.cours.atelier_partique.domain.exeption.IllegalLevelAtModificationException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,5 +20,4 @@ public class AdventurerDomain {
             throw new IllegalLevelAtModificationException(initialLevel, targetLevel);
         }
     }
-
 }

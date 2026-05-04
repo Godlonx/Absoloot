@@ -1,26 +1,18 @@
-package com.cours.atelier_partique.features.aventurer.usecase;
+package com.cours.atelier_partique.application.service;
 
-import com.cours.atelier_partique.features.aventurer.AdventurerDomain;
-import com.cours.atelier_partique.features.aventurer.AdventurerRepository;
-import com.cours.atelier_partique.infrastructure.database.models.AdventurerEntity;
-import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
-import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerPayload;
-import com.cours.atelier_partique.features.aventurer.AdventurerMapper;
+import com.cours.atelier_partique.domain.service.AdventurerDomain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class CreateAdventurerUseCase {
+public class CreateAdventurerUseCaseImpl {
 
-    private final AdventurerDomain adventurerDomain;
-    private final AdventurerRepository adventurerRepository;
+//    private final AdventurerDomain adventurerDomain;
+//    private final AdventurerRepository adventurerRepository;
 //    private final AdventurerMapper adventurerMapper;
 
 //    public AdventurerDto execute(AdventurerPayload adventurerPayload) {

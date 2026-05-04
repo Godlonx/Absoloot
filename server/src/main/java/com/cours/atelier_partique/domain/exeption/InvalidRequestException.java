@@ -1,4 +1,4 @@
-package com.cours.atelier_partique.domain;
+package com.cours.atelier_partique.domain.exeption;
 
 public abstract class InvalidRequestException extends RuntimeException {
     public InvalidRequestException(String message) {
