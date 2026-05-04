@@ -15,8 +15,8 @@ import {
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
+  { href: "/", label: "Accueil" },
+  { href: "/adventurers", label: "Aventuriers" },
 ];
 
 const NavigationBar = () => {
@@ -111,10 +111,10 @@ const NavigationBar = () => {
         {/* Right side */}
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost">
-            <Link to={"/login"}>Sign In</Link>
+            <Link to={"/login"}>Se connecter</Link>
           </Button>
           <Button asChild>
-            <Link to={"/register"}>Get started</Link>
+            <Link to={"/register"}>Créer un compte</Link>
           </Button>
         </div>
       </div>

@@ -10,11 +10,8 @@ const Home = () => {
           <p>You may now add components and start building.</p>
           <p>We&apos;ve already added the button component for you.</p>
           <Button className="mt-2" asChild>
-            <Link to="/about">About</Link>
+            <Link to="/adventurers">Voir les aventuriers</Link>
           </Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ import GlobalLayout from "./layouts/GlobalLayout.tsx"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="light">
       <BrowserRouter>
         <GlobalLayout>
           <App />
