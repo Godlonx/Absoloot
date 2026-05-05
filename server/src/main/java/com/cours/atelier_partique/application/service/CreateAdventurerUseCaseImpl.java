@@ -1,6 +1,11 @@
 package com.cours.atelier_partique.application.service;
 
+import com.cours.atelier_partique.application.ports.out.AdventurerRepository;
+import com.cours.atelier_partique.domain.model.Adventurer;
 import com.cours.atelier_partique.domain.service.AdventurerDomain;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.mapper.AdventurerMapper;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,23 +16,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class CreateAdventurerUseCaseImpl {
 
-//    private final AdventurerDomain adventurerDomain;
-//    private final AdventurerRepository adventurerRepository;
-//    private final AdventurerMapper adventurerMapper;
+    private final AdventurerDomain adventurerDomain;
+    private final AdventurerRepository adventurerRepository;
+    private final AdventurerMapper adventurerMapper;
 
-//    public AdventurerDto execute(AdventurerPayload adventurerPayload) {
-//        log.info("CreerAdventurerUseCase execute");
-//        adventurerDomain.checkLevelAtCreation(adventurerPayload.getLevel());
-//        AdventurerDto adventurerDto = buildAdventurer(adventurerPayload);
-//        AdventurerEntity adventurer = adventurerMapper.fromDto(adventurerDto);
-//        adventurerRepository.save(adventurer);
-//        return adventurerDto;
-//    }
+    public AdventurerDto execute(AdventurerPayload adventurerPayload) {
 
-//    private static @NonNull AdventurerDto buildAdventurer(AdventurerPayload adventurerPayload) {
-//        AdventurerDto adventurerDto = new AdventurerDto();
-//        UUID id = UUID.randomUUID();
-//        AventurierMapper.fillAventurier(aventurierPayload, aventurier, id);
-//        return aventurier;
-//    }
+        Adventurer adventurer = adventurerMapper.fromPayloadToAdventurer(adventurerPayload);
+        adventurerDomain.checkLevelAtCreation(adventurer.getLevel());
+        Adventurer savedAdventurer = adventurerRepository.save(adventurer);
+        return adventurerMapper.fromAdventureToDto(savedAdventurer);
+    }
 }

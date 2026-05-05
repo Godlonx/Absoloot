@@ -1,6 +1,7 @@
-package com.cours.atelier_partique.features.auth;
+package com.cours.atelier_partique.infrastructure.security;
 
-import com.cours.atelier_partique.infrastructure.database.models.UserEntity;
+import com.cours.atelier_partique.domain.model.User;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.UserEntity;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,13 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(UserEntity user) {
+    public String generateToken(User user) {
         var now = new Date();
         var expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("role", user.getRole().toString())
+                .claim("scope", user.getRole())
                 .claim("userId", user.getId().toString())
                 .issuedAt(now)
                 .expiration(expiryDate)

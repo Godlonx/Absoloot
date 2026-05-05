@@ -1,10 +1,14 @@
-package com.cours.atelier_partique.features.auth.usecase;
+package com.cours.atelier_partique.application.service;
 
-import com.cours.atelier_partique.domain.InvalidCredentialsException;
-import com.cours.atelier_partique.features.auth.JwtService;
-import com.cours.atelier_partique.features.auth.UserRepository;
+import com.cours.atelier_partique.domain.exeption.InvalidCredentialsException;
+import com.cours.atelier_partique.domain.model.User;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.UserEntity;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.mapper.UserMapper;
+import com.cours.atelier_partique.infrastructure.security.JwtService;
+import com.cours.atelier_partique.application.ports.out.UserRepository;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,29 +16,20 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class LoginUseCase {
-    private UserRepository userRepository;
-    private JwtService jwtService;
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Autowired
-    public void setJwtService(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
-
-    @Autowired
-    public void setPasswordEncoder(BCryptPasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     public LoginData execute(UserCredentials credentials) {
-        var user = userRepository.findByUsername(credentials.getUsername())
+        UserEntity userEntity = userRepository.findByUsername(credentials.getUsername())
             .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
+
+//        User user = Mapper UserEntity to User
+        User user = userMapper.toUser(userEntity);
+
 
         if (!passwordEncoder.matches(credentials.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");

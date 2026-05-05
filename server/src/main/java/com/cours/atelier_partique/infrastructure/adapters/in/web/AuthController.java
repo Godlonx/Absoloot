@@ -1,25 +1,22 @@
-package com.cours.atelier_partique.features.auth;
+package com.cours.atelier_partique.infrastructure.adapters.in.web;
 
-import com.cours.atelier_partique.features.auth.usecase.LoginUseCase;
-import com.cours.atelier_partique.features.auth.usecase.LogoutUseCase;
-import com.cours.atelier_partique.features.auth.usecase.RegisterUseCase;
+import com.cours.atelier_partique.application.service.LoginUseCase;
+import com.cours.atelier_partique.application.service.LogoutUseCase;
+import com.cours.atelier_partique.application.service.RegisterUseCase;
 import com.cours.atelier_partique.infrastructure.web.openapi.api.AuthenticationApi;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.RegisterCredentials;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller
+@RequiredArgsConstructor
 public class AuthController implements AuthenticationApi {
-    @Autowired
-    private RegisterUseCase registerUseCase;
-
-    @Autowired
-    private LoginUseCase loginUseCase;
-
-    @Autowired
-    private LogoutUseCase logoutUseCase;
+    private final RegisterUseCase registerUseCase;
+    private final LoginUseCase loginUseCase;
+    private final LogoutUseCase logoutUseCase;
 
     @Override
     public LoginData register(RegisterCredentials registerCredentials) {

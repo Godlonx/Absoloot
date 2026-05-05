@@ -1,4 +1,4 @@
-package com.cours.atelier_partique.domain.model;
+package com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity;
 
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
 import jakarta.persistence.*;
