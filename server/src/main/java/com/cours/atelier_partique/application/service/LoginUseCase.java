@@ -31,6 +31,6 @@ public class LoginUseCase {
 
         var token = jwtService.generateToken(user);
 
-        return authRestMapper.toLoginData(user.getRole(), token);
+        return authRestMapper.toLoginData(token);
     }
 }

@@ -17,5 +17,5 @@ public interface AuthRestMapper {
     @Mapping(source="hashword", target="password")
     User fromRegisterCredentials(RegisterCredentials credentials, String hashword);
 
-    LoginData toLoginData(Role role, String token);
+    LoginData toLoginData(String token);
 }

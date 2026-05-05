@@ -777,6 +777,7 @@ paths:
             example:
               username: new_adventurer
               password: password123
+              role: VIEWER
         required: true
       responses:
         '201':
@@ -921,28 +922,21 @@ components:
       description: Response returned after successful authentication
       required:
         - token
-        - role
       type: object
       properties:
         token:
           type: string
           format: jwt
           description: JWT token for authenticating subsequent requests
-        role:
-          type: string
-          enum:
-            - ADMIN
-            - VIEWER
-          description: User role
       example:
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-        role: VIEWER
     RegisterCredentials:
       title: Registration data
       description: Data required to create a new account
       required:
         - username
         - password
+        - role
       type: object
       properties:
         username:
@@ -954,6 +948,12 @@ components:
           type: string
           minLength: 6
           description: Secure password (minimum 6 characters)
+        role:
+          type: string
+          enum:
+            - VIEWER
+            - ADMIN
+          description: User role (VIEWER or ADMIN)
     AttributeMin:
       title: Minimum attribute requirement
       description: Defines an attribute and its minimum required value

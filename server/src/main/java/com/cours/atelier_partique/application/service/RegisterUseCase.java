@@ -29,12 +29,12 @@ public class RegisterUseCase {
         String hashedPassword = passwordEncoder.encode(credentials.getPassword());
 
         User user = authRestMapper.fromRegisterCredentials(credentials, hashedPassword);
-        user.setRole(Role.VIEWER);
+        user.setRole(Role.valueOf(credentials.getRole().getValue()));
 
         User savedUser = userRepository.save(user);
 
         String token = jwtService.generateToken(savedUser);
 
-        return authRestMapper.toLoginData(savedUser.getRole(), token);
+        return authRestMapper.toLoginData(token);
     }
 }
