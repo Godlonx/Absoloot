@@ -1,6 +1,7 @@
 package com.cours.atelier_partique.application.service;
 
 import com.cours.atelier_partique.application.ports.out.UserRepository;
+import com.cours.atelier_partique.domain.exeption.InvalidCredentialsException;
 import com.cours.atelier_partique.domain.exeption.UserAlreadyExistsException;
 import com.cours.atelier_partique.domain.model.Role;
 import com.cours.atelier_partique.domain.model.User;
@@ -29,11 +30,8 @@ public class RegisterUseCase {
     private final AuthRestMapper authRestMapper;
 
     public LoginData execute(RegisterCredentials credentials) {
-
-        Optional<User> existingUser = userRepository.findByUsername(credentials.getUsername());
-        if (existingUser.isPresent()) {
-            throw new UserAlreadyExistsException("Username '" + credentials.getUsername() + "' already exists");
-        }
+        userRepository.findByUsername(credentials.getUsername())
+                .orElseThrow(() -> new UserAlreadyExistsException("Username '" + credentials.getUsername() + "' already exists"));
 
         String hashedPassword = passwordEncoder.encode(credentials.getPassword());
 

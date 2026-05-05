@@ -10,8 +10,9 @@ import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @Validated
 @RequiredArgsConstructor
 public class AuthController implements AuthenticationApi {
@@ -21,8 +22,7 @@ public class AuthController implements AuthenticationApi {
 
     @Override
     public LoginData register(RegisterCredentials registerCredentials) {
-        LoginData data = registerUseCase.execute(registerCredentials);
-        return data;
+        return registerUseCase.execute(registerCredentials);
     }
 
     @Override
