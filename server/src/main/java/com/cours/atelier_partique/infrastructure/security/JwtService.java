@@ -1,7 +1,6 @@
 package com.cours.atelier_partique.infrastructure.security;
 
 import com.cours.atelier_partique.domain.model.User;
-import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.UserEntity;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;

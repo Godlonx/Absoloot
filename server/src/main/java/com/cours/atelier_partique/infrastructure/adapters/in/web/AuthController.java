@@ -8,10 +8,11 @@ import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.RegisterCredentials;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 
 @Controller
+@Validated
 @RequiredArgsConstructor
 public class AuthController implements AuthenticationApi {
     private final RegisterUseCase registerUseCase;

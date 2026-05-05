@@ -10,7 +10,6 @@ import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +25,7 @@ public class LoginUseCase {
     public LoginData execute(UserCredentials credentials) {
         UserEntity userEntity = userRepository.findByUsername(credentials.getUsername())
             .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
-
-//        User user = Mapper UserEntity to User
+            
         User user = userMapper.toUser(userEntity);
 
 
