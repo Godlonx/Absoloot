@@ -5,7 +5,6 @@ import com.cours.atelier_partique.domain.exeption.InvalidCredentialsException;
 import com.cours.atelier_partique.domain.model.User;
 import com.cours.atelier_partique.infrastructure.adapters.in.web.auth.AuthRestMapper;
 import com.cours.atelier_partique.infrastructure.security.JwtService;
-import com.cours.atelier_partique.infrastructure.adapters.out.persistence.repository.jpa.JpaUserRepository;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LoginUseCase {
-    private final JpaUserRepository jpaUserRepository;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthRestMapper authRestMapper;

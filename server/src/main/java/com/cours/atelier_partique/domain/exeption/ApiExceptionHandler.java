@@ -22,12 +22,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ProblemDetail handleUserAlreadyExistsException(UserAlreadyExistsException exception) {
-        return buildProblemDetail(exception, HttpStatus.CONFLICT, "User already exists");
+        return buildProblemDetail(exception, HttpStatus.CONFLICT, exception.getMessage());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
     public ProblemDetail handleInvalidCredentialsException(InvalidCredentialsException exception) {
-        return buildProblemDetail(exception, HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        return buildProblemDetail(exception, HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -47,7 +47,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ProblemDetail handleValidationException(NoResourceFoundException exception) {
-        return buildProblemDetail(exception, HttpStatus.NOT_FOUND, "not found");
+        return buildProblemDetail(exception, HttpStatus.NOT_FOUND, "Not found");
     }
 
     @ExceptionHandler(Exception.class)
