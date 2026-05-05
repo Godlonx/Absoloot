@@ -24,7 +24,9 @@ public class RegisterUseCase {
 
     public LoginData execute(RegisterCredentials credentials) {
         userRepository.findByUsername(credentials.getUsername())
-                .ifPresent(user -> new UserAlreadyExistsException("Username '" + user.getUsername() + "' already exists"));
+                .ifPresent(user -> {
+                    throw new UserAlreadyExistsException("Username '" + user.getUsername() + "' already exists");
+                });
 
         String hashedPassword = passwordEncoder.encode(credentials.getPassword());
 

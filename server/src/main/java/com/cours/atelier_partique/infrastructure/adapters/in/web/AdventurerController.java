@@ -8,13 +8,13 @@ import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerPaylo
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class AdventurerController implements AdventurersApi {
 
