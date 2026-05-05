@@ -1,5 +1,6 @@
 package com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity;
 
+import com.cours.atelier_partique.domain.model.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,9 +28,4 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
-
-    public enum Role {
-        ADMIN,
-        VIEWER
-    }
 }

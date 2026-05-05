@@ -1,5 +1,6 @@
 package com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity;
 
+import com.cours.atelier_partique.domain.model.AdventurerClass;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,12 +25,17 @@ public class AdventurerEntity {
     @Column(nullable = false)
     private int level;
 
+    @Column(nullable = false)
+    private int mental;
+
+    @Column(nullable = false)
+    private int perception;
+
+    @Column(nullable = false)
+    private int physical;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private AdventurerDto.AdvClassEnum advClass;
-
-    // etc.
-
-    // getters/setters
+    private AdventurerClass advClass;
 }
 

@@ -1,7 +1,8 @@
-package com.cours.atelier_partique.infrastructure.adapters.in.web;
+package com.cours.atelier_partique.infrastructure.adapters.in.web.adventurer;
 
 
 import com.cours.atelier_partique.application.service.CreateAdventurerUseCase;
+import com.cours.atelier_partique.application.service.ListAllAdventurerUseCase;
 import com.cours.atelier_partique.infrastructure.web.openapi.api.AdventurersApi;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerPayload;
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class AdventurerController implements AdventurersApi {
 
     private final CreateAdventurerUseCase createAdventurerUseCase;
+
+    private final ListAllAdventurerUseCase listAllAdventurerUseCase;
 
     @Override
     public AdventurerDto createAdventurer(
@@ -40,7 +43,7 @@ public class AdventurerController implements AdventurersApi {
 
     @Override
     public List<AdventurerDto> listAdventurer() {
-        return List.of();
+        return listAllAdventurerUseCase.execute();
     }
 
     @Override

@@ -17,5 +17,11 @@ public class Adventurer {
 
     private int level;
 
-    private AdventurerDto.AdvClassEnum advClass;
+    private int mental;
+
+    private int perception;
+
+    private int physical;
+
+    private AdventurerClass advClass;
 }
