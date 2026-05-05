@@ -1,11 +1,13 @@
 package com.cours.atelier_partique.infrastructure.adapters.in.web;
 
 
+import com.cours.atelier_partique.application.service.CreateAdventurerUseCase;
 import com.cours.atelier_partique.infrastructure.web.openapi.api.AdventurersApi;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerPayload;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -13,14 +15,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
+@RequiredArgsConstructor
 public class AdventurerController implements AdventurersApi {
+
+    private final CreateAdventurerUseCase createAdventurerUseCase;
 
     @Override
     public AdventurerDto createAdventurer(
             @Parameter(name = "AdventurerPayload", description = "", required = true)
             @Valid @RequestBody AdventurerPayload adventurerPayload
     ) {
-        return null;
+        return createAdventurerUseCase.execute(adventurerPayload);
     }
 
     @Override

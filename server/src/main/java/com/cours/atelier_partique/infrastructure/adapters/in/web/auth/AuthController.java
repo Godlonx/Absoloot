@@ -1,4 +1,4 @@
-package com.cours.atelier_partique.infrastructure.adapters.in.web;
+package com.cours.atelier_partique.infrastructure.adapters.in.web.auth;
 
 import com.cours.atelier_partique.application.service.LoginUseCase;
 import com.cours.atelier_partique.application.service.LogoutUseCase;
@@ -21,7 +21,8 @@ public class AuthController implements AuthenticationApi {
 
     @Override
     public LoginData register(RegisterCredentials registerCredentials) {
-        return registerUseCase.execute(registerCredentials);
+        LoginData data = registerUseCase.execute(registerCredentials);
+        return data;
     }
 
     @Override

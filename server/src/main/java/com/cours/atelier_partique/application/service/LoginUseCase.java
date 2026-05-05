@@ -3,9 +3,9 @@ package com.cours.atelier_partique.application.service;
 import com.cours.atelier_partique.domain.exeption.InvalidCredentialsException;
 import com.cours.atelier_partique.domain.model.User;
 import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.UserEntity;
-import com.cours.atelier_partique.infrastructure.adapters.out.persistence.mapper.UserMapper;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.mapper.UserEntityMapper;
 import com.cours.atelier_partique.infrastructure.security.JwtService;
-import com.cours.atelier_partique.application.ports.out.UserRepository;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.repository.jpa.JpaUserRepository;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.LoginData;
 import com.cours.atelier_partique.infrastructure.web.openapi.dto.UserCredentials;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +17,17 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LoginUseCase {
-    private final UserRepository userRepository;
+    private final JpaUserRepository jpaUserRepository;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
+    private final UserEntityMapper userEntityMapper;
 
     public LoginData execute(UserCredentials credentials) {
-        UserEntity userEntity = userRepository.findByUsername(credentials.getUsername())
+        UserEntity userEntity = jpaUserRepository.findByUsername(credentials.getUsername())
             .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
-            
-        User user = userMapper.toUser(userEntity);
+
+//        User user = Mapper UserEntity to User
+        User user = userEntityMapper.toUser(userEntity);
 
 
         if (!passwordEncoder.matches(credentials.getPassword(), user.getPassword())) {

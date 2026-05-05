@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class CreateAdventurerUseCaseImpl {
+public class CreateAdventurerUseCase {
 
     private final AdventurerDomain adventurerDomain;
     private final AdventurerRepository adventurerRepository;
