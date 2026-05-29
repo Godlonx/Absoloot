@@ -30,6 +30,7 @@
 		<java.version>25</java.version>
 		<swagger-annotations.version>2.2.36</swagger-annotations.version>
 		<jackson-databind-nullable.version>0.2.7</jackson-databind-nullable.version>
+		<jjwt.version>0.12.6</jjwt.version>
 
 		<openapi-generator.version>7.15.0</openapi-generator.version>
 		<openapi-generator.rootPackage>${root-package}.infrastructure.web.openapi</openapi-generator.rootPackage>
@@ -92,6 +93,23 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-h2console</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -141,7 +159,7 @@
 								<interfaceOnly>true</interfaceOnly>
 								<library>spring-boot</library>
 								<modelNameSuffix>Dto</modelNameSuffix>
-								<openApiNullable>true</openApiNullable>
+								<openApiNullable>false</openApiNullable>
 								<skipDefaultInterface>true</skipDefaultInterface>
 								<useBeanValidation>true</useBeanValidation>
 								<useJakartaEe>true</useJakartaEe>
