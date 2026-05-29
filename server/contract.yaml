@@ -1163,12 +1163,12 @@ components:
       description: Deux listes de compétences pour un aventurier - celles acquérables et celles bloquées
       type: object
       properties:
-        acquérables:
+        acquerables:
           type: array
           items:
             $ref: '#/components/schemas/CompetenceDto'
           description: Compétences non encore acquises dont tous les prérequis sont satisfaits
-        bloquées:
+        bloquees:
           type: array
           items:
             type: object
@@ -1200,7 +1200,7 @@ components:
           items:
             $ref: '#/components/schemas/AdventurerDto'
           description: Aventuriers qui possèdent déjà cette compétence
-        éligibles:
+        eligibles:
           type: array
           items:
             $ref: '#/components/schemas/AdventurerDto'

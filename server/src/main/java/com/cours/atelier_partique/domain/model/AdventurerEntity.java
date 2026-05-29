@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -28,8 +30,21 @@ public class AdventurerEntity {
     @Column(nullable = false, length = 30)
     private AdventurerDto.AdvClassEnum advClass;
 
-    // etc.
+    @Column(nullable = false)
+    private int physical;
 
-    // getters/setters
+    @Column(nullable = false)
+    private int mental;
+
+    @Column(nullable = false)
+    private int perception;
+
+    /** Compétences actuellement acquises par l'aventurier. */
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "adventurer_competences",
+            joinColumns = @JoinColumn(name = "adventurer_id"),
+            inverseJoinColumns = @JoinColumn(name = "competence_id")
+    )
+    private Set<CompetenceEntity> competences = new HashSet<>();
 }
-
