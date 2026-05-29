@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/AuthContext"
 import * as adventurersService from "@/services/adventurers.service"
-import * as adventurerCompetencesService from "@/services/adventurer-competences.service"
-import * as competencesService from "@/services/competences.service"
-import CompetenceTree from "@/components/competence-tree/CompetenceTree"
+import * as adventurerSkillsService from "@/services/adventurer-skills.service"
+import * as skillsService from "@/services/skills.service"
+import SkillTree from "@/components/skill-tree/SkillTree"
 import type {
   AdventurerDto,
-  CompetenceDto,
-  CompetencesDisponiblesResponse,
+  SkillDto,
+  AvailableSkillsResponse,
   ApiError,
 } from "@/types"
 
@@ -20,23 +20,23 @@ const AdventurerDetail = () => {
   const { role } = useAuth()
 
   const [adventurer, setAdventurer] = useState<AdventurerDto | null>(null)
-  const [competences, setCompetences] = useState<CompetenceDto[]>([])
-  const [catalog, setCatalog] = useState<CompetenceDto[]>([])
-  const [disponibles, setDisponibles] =
-    useState<CompetencesDisponiblesResponse | null>(null)
+  const [skills, setSkills] = useState<SkillDto[]>([])
+  const [catalog, setCatalog] = useState<SkillDto[]>([])
+  const [available, setAvailable] =
+    useState<AvailableSkillsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchCompetencesData = async () => {
+  const fetchSkillsData = async () => {
     if (!id) return
 
     try {
-      const [competencesData, disponiblesData] = await Promise.all([
-        adventurerCompetencesService.list(id),
-        adventurerCompetencesService.listDisponibles(id),
+      const [skillsData, availableData] = await Promise.all([
+        adventurerSkillsService.list(id),
+        adventurerSkillsService.listAvailable(id),
       ])
-      setCompetences(competencesData)
-      setDisponibles(disponiblesData)
+      setSkills(skillsData)
+      setAvailable(availableData)
     } catch {
       // Erreur silencieuse pour les donnees secondaires
     }
@@ -50,16 +50,16 @@ const AdventurerDetail = () => {
       setError(null)
 
       try {
-        const [adventurerData, competencesData, disponiblesData, catalogData] =
+        const [adventurerData, skillsData, availableData, catalogData] =
           await Promise.all([
             adventurersService.get(id),
-            adventurerCompetencesService.list(id),
-            adventurerCompetencesService.listDisponibles(id),
-            competencesService.list(0, 1000),
+            adventurerSkillsService.list(id),
+            adventurerSkillsService.listAvailable(id),
+            skillsService.list(0, 1000),
           ])
         setAdventurer(adventurerData)
-        setCompetences(competencesData)
-        setDisponibles(disponiblesData)
+        setSkills(skillsData)
+        setAvailable(availableData)
         setCatalog(catalogData.content)
       } catch {
         setError("Impossible de charger les donnees de l'aventurier.")
@@ -86,13 +86,13 @@ const AdventurerDetail = () => {
     }
   }
 
-  const handleAddCompetence = async (competenceId: string) => {
+  const handleAddSkill = async (skillId: string) => {
     if (!id) return
 
     setError(null)
     try {
-      await adventurerCompetencesService.add(id, competenceId)
-      await fetchCompetencesData()
+      await adventurerSkillsService.add(id, skillId)
+      await fetchSkillsData()
     } catch (err) {
       const apiError = err as ApiError
       if (apiError.status === 422) {
@@ -103,20 +103,20 @@ const AdventurerDetail = () => {
     }
   }
 
-  const handleRemoveCompetence = async (
-    competenceId: string,
-    competenceName: string
+  const handleRemoveSkill = async (
+    skillId: string,
+    skillName: string
   ) => {
     if (!id) return
 
-    if (!confirm(`Etes-vous sur de vouloir retirer "${competenceName}" ?`)) {
+    if (!confirm(`Etes-vous sur de vouloir retirer "${skillName}" ?`)) {
       return
     }
 
     setError(null)
     try {
-      await adventurerCompetencesService.remove(id, competenceId)
-      await fetchCompetencesData()
+      await adventurerSkillsService.remove(id, skillId)
+      await fetchSkillsData()
     } catch (err) {
       const apiError = err as ApiError
       if (apiError.status === 409) {
@@ -234,16 +234,16 @@ const AdventurerDetail = () => {
             <CardTitle>Arbre de competences</CardTitle>
           </CardHeader>
           <CardContent>
-            {disponibles ? (
-              <CompetenceTree
+            {available ? (
+              <SkillTree
                 adventurer={adventurer}
                 catalog={catalog}
-                acquises={competences}
-                disponibles={disponibles}
+                acquired={skills}
+                available={available}
                 role={role}
                 adventurerId={id ?? ""}
-                onAdd={handleAddCompetence}
-                onRemove={handleRemoveCompetence}
+                onAdd={handleAddSkill}
+                onRemove={handleRemoveSkill}
               />
             ) : (
               <p className="text-muted-foreground">

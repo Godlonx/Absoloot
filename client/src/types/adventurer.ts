@@ -1,14 +1,14 @@
 export const ADV_CLASSES = [
-  "GUERRIER",
+  "WARRIOR",
   "MAGE",
-  "RODEUR",
-  "VOLEUR",
-  "CLERC",
-  "BARDE",
-  "DRUIDE",
+  "RANGER",
+  "ROGUE",
+  "CLERIC",
+  "BARD",
+  "DRUID",
   "PALADIN",
-  "BARBARE",
-  "MOINE",
+  "BARBARIAN",
+  "MONK",
 ] as const;
 
 export type AdvClass = (typeof ADV_CLASSES)[number];

@@ -1,64 +1,35 @@
 package com.cours.atelier_partique.infrastructure.security;
 
-import io.jsonwebtoken.Claims;
+import com.cours.atelier_partique.domain.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-/**
- * Émission et validation de tokens JWT HS256 portant le username (sub) et le rôle.
- */
-@Service
+@Component
+@RequiredArgsConstructor
 public class JwtService {
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private final SecretKey key;
-    private final long expirationMs;
+    @Value("${jwt.expiration}")
+    private long expiration;
 
-    public JwtService(
-            @Value("${app.jwt.secret:change-me-super-secret-key-for-absoloot-atelier-pratique-jwt-2026}") String secret,
-            @Value("${app.jwt.expiration-ms:86400000}") long expirationMs) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
-    }
+    public String generateToken(User user) {
+        var now = new Date();
+        var expiryDate = new Date(now.getTime() + expiration);
 
-    public String generateToken(String username, String role) {
-        Date now = new Date();
         return Jwts.builder()
-                .subject(username)
-                .claim("role", role)
+                .subject(user.getUsername())
+                .claim("scope", user.getRole())
+                .claim("userId", user.getId().toString())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + expirationMs))
-                .signWith(key)
+                .expiration(expiryDate)
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .compact();
-    }
-
-    public boolean isValid(String token) {
-        try {
-            parse(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String extractUsername(String token) {
-        return parse(token).getSubject();
-    }
-
-    public String extractRole(String token) {
-        return parse(token).get("role", String.class);
-    }
-
-    private Claims parse(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
     }
 }

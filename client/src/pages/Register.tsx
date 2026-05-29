@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/AuthContext"
 import * as authService from "@/services/auth.service"
+import type { Roles } from "@/types/auth"
 
 const Register = () => {
   const navigate = useNavigate()
@@ -13,6 +14,7 @@ const Register = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState<Roles>("VIEWER")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,7 +31,7 @@ const Register = () => {
     setError(null)
 
     try {
-      const data = await authService.register({ username, password })
+      const data = await authService.register({ username, password, role })
       login(data)
       navigate("/")
     } catch (err) {
@@ -87,6 +89,19 @@ const Register = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={loading}
           />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="role">Role souhaité</Label>
+          <select
+            id="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value as Roles)}
+            disabled={loading}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="VIEWER">VIEWER</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Inscription..." : "S'inscrire"}

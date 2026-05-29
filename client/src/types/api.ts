@@ -5,15 +5,15 @@ export type ApiError = {
 
 export type ConflictError = ApiError & {
   detail?: string;
-  aventuriersInvalides?: Array<{
+  invalidAdventurers?: Array<{
     id: string;
-    nom: string;
-    raison: string;
+    name: string;
+    reason: string;
   }>;
 };
 
 export type UnprocessableEntityError = ApiError & {
-  prerequisNonSatisfait: {
+  unmetPrerequisite: {
     type: string;
     detail: string;
   };

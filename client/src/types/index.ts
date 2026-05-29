@@ -2,15 +2,15 @@
 export { ADV_CLASSES } from "./adventurer";
 export type { AdvClass, AdventurerPayload, AdventurerDto } from "./adventurer";
 
-// Competence types
+// Skill types
 export type {
-  Caracteristique,
-  CaracteristiqueMin,
-  CompetenceReference,
-  Prerequis,
-  CompetencePayload,
-  CompetenceDto,
-} from "./competence";
+  Attribute,
+  AttributeMin,
+  SkillReference,
+  Prerequisite,
+  SkillPayload,
+  SkillDto,
+} from "./skill";
 
 // Auth types
 export type {
@@ -30,6 +30,6 @@ export type {
 
 // Response types
 export type {
-  CompetencesDisponiblesResponse,
-  AventuriersLiesResponse,
+  AvailableSkillsResponse,
+  LinkedAdventurersResponse,
 } from "./responses";

@@ -1,18 +1,18 @@
 import type { AdventurerDto } from "./adventurer";
-import type { CompetenceDto, CompetenceReference } from "./competence";
+import type { SkillDto, SkillReference } from "./skill";
 
-export type CompetencesDisponiblesResponse = {
-  acquerables: CompetenceDto[];
-  bloquees: Array<{
-    competence: CompetenceReference;
-    prerequisManquants: Array<{
+export type AvailableSkillsResponse = {
+  acquirable: SkillDto[];
+  locked: Array<{
+    skill: SkillReference;
+    unmetPrerequisites: Array<{
       type: string;
       detail: string;
     }>;
   }>;
 };
 
-export type AventuriersLiesResponse = {
-  possesseurs: AdventurerDto[];
-  eligibles: AdventurerDto[];
+export type LinkedAdventurersResponse = {
+  owners: AdventurerDto[];
+  eligible: AdventurerDto[];
 };

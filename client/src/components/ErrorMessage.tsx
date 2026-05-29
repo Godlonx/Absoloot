@@ -24,8 +24,8 @@ const getErrorMessage = (error: ApiError): string => {
       return error.message;
     case 422: {
       const unprocessableError = error as UnprocessableEntityError;
-      if (unprocessableError.prerequisNonSatisfait) {
-        return `Prerequis non satisfait : ${unprocessableError.prerequisNonSatisfait.detail}`;
+      if (unprocessableError.unmetPrerequisite) {
+        return `Prerequis non satisfait : ${unprocessableError.unmetPrerequisite.detail}`;
       }
       return error.message;
     }
@@ -56,13 +56,13 @@ const ErrorMessage = ({
         {conflictError.detail && (
           <p className="text-sm font-medium">{conflictError.detail}</p>
         )}
-        {conflictError.aventuriersInvalides &&
-          conflictError.aventuriersInvalides.length > 0 && (
+        {conflictError.invalidAdventurers &&
+          conflictError.invalidAdventurers.length > 0 && (
             <ul className="list-inside list-disc space-y-1 text-sm">
-              {conflictError.aventuriersInvalides.map((aventurier) => (
-                <li key={aventurier.id}>
-                  <span className="font-medium">{aventurier.nom}</span> -{" "}
-                  {aventurier.raison}
+              {conflictError.invalidAdventurers.map((adventurer) => (
+                <li key={adventurer.id}>
+                  <span className="font-medium">{adventurer.name}</span> -{" "}
+                  {adventurer.reason}
                 </li>
               ))}
             </ul>

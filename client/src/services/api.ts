@@ -28,16 +28,16 @@ export const handleResponse = async <T>(response: Response): Promise<T> => {
         status: 409,
         message: error.message || "Conflit detecte",
         detail: error.detail,
-        aventuriersInvalides: error.aventuriersInvalides,
+        invalidAdventurers: error.invalidAdventurers,
       };
       throw conflictError;
     }
 
-    if (response.status === 422 && error.prerequisNonSatisfait) {
+    if (response.status === 422 && error.unmetPrerequisite) {
       const unprocessableError: UnprocessableEntityError = {
         status: 422,
         message: error.message || "Les prerequis ne sont pas satisfaits",
-        prerequisNonSatisfait: error.prerequisNonSatisfait,
+        unmetPrerequisite: error.unmetPrerequisite,
       };
       throw unprocessableError;
     }

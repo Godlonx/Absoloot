@@ -1,18 +1,16 @@
 package com.cours.atelier_partique.infrastructure.seed;
 
-import com.cours.atelier_partique.application.ports.out.AdventurerRepository;
-import com.cours.atelier_partique.application.ports.out.CompetenceRepository;
-import com.cours.atelier_partique.application.ports.out.UserRepository;
-import com.cours.atelier_partique.domain.model.AdventurerEntity;
-import com.cours.atelier_partique.domain.model.CaracteristiqueMinEmbeddable;
-import com.cours.atelier_partique.domain.model.CompetenceEntity;
+import com.cours.atelier_partique.domain.model.AdventurerClass;
 import com.cours.atelier_partique.domain.model.Role;
-import com.cours.atelier_partique.domain.model.UserEntity;
-import com.cours.atelier_partique.infrastructure.web.openapi.dto.AdventurerDto;
-import com.cours.atelier_partique.infrastructure.web.openapi.dto.CaracteristiqueMin;
-import com.cours.atelier_partique.infrastructure.web.openapi.dto.Prerequis;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.AdventurerEntity;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.AttributeMinEmbeddable;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.SkillEntity;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.entity.UserEntity;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.repository.jpa.JpaAdventurerRepository;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.repository.jpa.JpaSkillRepository;
+import com.cours.atelier_partique.infrastructure.adapters.out.persistence.repository.jpa.JpaUserRepository;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.AttributeMin;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.Prerequisite;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -23,26 +21,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Amorce la base avec les mêmes données que les mocks frontend
- * (client/src/mocks/data) afin que front et back soient cohérents.
- * Les entités sont sauvegardées directement via les repositories (les use cases
- * de création rejetteraient les niveaux > 1).
+ * Seeds the database with the same data as the frontend mocks so front and
+ * back stay consistent. Entities are saved directly through the repositories
+ * (the creation use cases would reject levels &gt; 1).
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
-    private final CompetenceRepository competenceRepository;
-    private final AdventurerRepository adventurerRepository;
-    private final UserRepository userRepository;
+    private final JpaSkillRepository skillRepository;
+    private final JpaAdventurerRepository adventurerRepository;
+    private final JpaUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -50,12 +43,11 @@ public class DataSeeder implements CommandLineRunner {
         if (userRepository.count() == 0) {
             seedUsers();
         }
-        if (competenceRepository.count() == 0 && adventurerRepository.count() == 0) {
-            Map<String, CompetenceEntity> competences = seedCompetences();
+        if (skillRepository.count() == 0 && adventurerRepository.count() == 0) {
+            Map<String, SkillEntity> skills = seedSkills();
             Map<String, AdventurerEntity> adventurers = seedAdventurers();
-            seedLinks(adventurers, competences);
-            log.info("Seeded {} competences, {} adventurers",
-                    competences.size(), adventurers.size());
+            seedLinks(adventurers, skills);
+            log.info("Seeded {} skills, {} adventurers", skills.size(), adventurers.size());
         }
     }
 
@@ -64,134 +56,128 @@ public class DataSeeder implements CommandLineRunner {
         admin.setUsername("admin");
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setRole(Role.ADMIN);
-        entityManager.persist(admin);
+        userRepository.save(admin);
 
         UserEntity viewer = new UserEntity();
         viewer.setUsername("viewer");
         viewer.setPassword(passwordEncoder.encode("viewer123"));
         viewer.setRole(Role.VIEWER);
-        entityManager.persist(viewer);
+        userRepository.save(viewer);
 
         log.info("Seeded users: admin/admin123 (ADMIN), viewer/viewer123 (VIEWER)");
     }
 
-    private Map<String, CompetenceEntity> seedCompetences() {
-        Map<String, CompetenceEntity> byMockId = new HashMap<>();
+    private Map<String, SkillEntity> seedSkills() {
+        Map<String, SkillEntity> byMockId = new HashMap<>();
 
-        // Création sans prérequis chaînés d'abord (pour pouvoir les référencer ensuite).
-        byMockId.put("comp-001", buildCompetence("comp-001", "Maîtrise des armes",
-                "Permet d'utiliser efficacement toutes les armes de mêlée standard.",
-                null, 5, carac(CaracteristiqueMin.CaracteristiqueEnum.PHYSICAL, 15)));
-        byMockId.put("comp-002", buildCompetence("comp-002", "Canalisation magique",
-                "Capacité à canaliser l'énergie magique pour lancer des sorts.",
-                Prerequis.ClasseRequiseEnum.MAGE, 10, carac(CaracteristiqueMin.CaracteristiqueEnum.MENTAL, 25)));
-        byMockId.put("comp-003", buildCompetence("comp-003", "Rage du berserker",
-                "Entre dans une fureur dévastatrice augmentant les dégâts mais réduisant la défense.",
-                Prerequis.ClasseRequiseEnum.BARBARE, 15, carac(CaracteristiqueMin.CaracteristiqueEnum.PHYSICAL, 30)));
-        byMockId.put("comp-004", buildCompetence("comp-004", "Téléportation",
-                "Permet de se téléporter sur de courtes distances.",
-                Prerequis.ClasseRequiseEnum.MAGE, 25, carac(CaracteristiqueMin.CaracteristiqueEnum.MENTAL, 35)));
-        byMockId.put("comp-005", buildCompetence("comp-005", "Frappe silencieuse",
-                "Attaque furtive infligeant des dégâts critiques depuis les ombres.",
-                Prerequis.ClasseRequiseEnum.VOLEUR, 20, carac(CaracteristiqueMin.CaracteristiqueEnum.PERCEPTION, 30)));
-        byMockId.put("comp-006", buildCompetence("comp-006", "Cri de guerre",
-                "Pousse un cri terrifiant qui intimide les ennemis et renforce les alliés.",
-                null, 30, carac(CaracteristiqueMin.CaracteristiqueEnum.PHYSICAL, 25)));
-        byMockId.put("comp-007", buildCompetence("comp-007", "Invocation élémentaire",
-                "Invoque un élémentaire pour combattre à vos côtés.",
-                Prerequis.ClasseRequiseEnum.MAGE, 40, carac(CaracteristiqueMin.CaracteristiqueEnum.MENTAL, 40)));
-        byMockId.put("comp-008", buildCompetence("comp-008", "Vision nocturne",
-                "Permet de voir parfaitement dans l'obscurité totale.",
-                null, 10, carac(CaracteristiqueMin.CaracteristiqueEnum.PERCEPTION, 20)));
-        byMockId.put("comp-009", buildCompetence("comp-009", "Méditation profonde",
-                "Récupère rapidement l'énergie mentale par une méditation intense.",
-                Prerequis.ClasseRequiseEnum.MOINE, 15, carac(CaracteristiqueMin.CaracteristiqueEnum.MENTAL, 25)));
-        byMockId.put("comp-010", buildCompetence("comp-010", "Bénédiction divine",
-                "Invoque la faveur des dieux pour soigner et protéger.",
-                Prerequis.ClasseRequiseEnum.CLERC, 20, carac(CaracteristiqueMin.CaracteristiqueEnum.MENTAL, 30)));
+        byMockId.put("skill-001", buildSkill("Weapon Mastery",
+                "Allows efficient use of all standard melee weapons.",
+                null, 5, attr(AttributeMin.AttributeEnum.PHYSICAL, 15)));
+        byMockId.put("skill-002", buildSkill("Magic Channeling",
+                "Ability to channel magical energy to cast spells.",
+                Prerequisite.ClassRequiredEnum.MAGE, 10, attr(AttributeMin.AttributeEnum.MENTAL, 25)));
+        byMockId.put("skill-003", buildSkill("Berserker Rage",
+                "Enters a devastating fury increasing damage but reducing defense.",
+                Prerequisite.ClassRequiredEnum.BARBARIAN, 15, attr(AttributeMin.AttributeEnum.PHYSICAL, 30)));
+        byMockId.put("skill-004", buildSkill("Teleportation",
+                "Allows teleporting over short distances.",
+                Prerequisite.ClassRequiredEnum.MAGE, 25, attr(AttributeMin.AttributeEnum.MENTAL, 35)));
+        byMockId.put("skill-005", buildSkill("Silent Strike",
+                "Stealth attack dealing critical damage from the shadows.",
+                Prerequisite.ClassRequiredEnum.ROGUE, 20, attr(AttributeMin.AttributeEnum.PERCEPTION, 30)));
+        byMockId.put("skill-006", buildSkill("War Cry",
+                "Lets out a terrifying cry that intimidates enemies and bolsters allies.",
+                null, 30, attr(AttributeMin.AttributeEnum.PHYSICAL, 25)));
+        byMockId.put("skill-007", buildSkill("Elemental Summoning",
+                "Summons an elemental to fight at your side.",
+                Prerequisite.ClassRequiredEnum.MAGE, 40, attr(AttributeMin.AttributeEnum.MENTAL, 40)));
+        byMockId.put("skill-008", buildSkill("Night Vision",
+                "Allows seeing perfectly in total darkness.",
+                null, 10, attr(AttributeMin.AttributeEnum.PERCEPTION, 20)));
+        byMockId.put("skill-009", buildSkill("Deep Meditation",
+                "Quickly recovers mental energy through intense meditation.",
+                Prerequisite.ClassRequiredEnum.MONK, 15, attr(AttributeMin.AttributeEnum.MENTAL, 25)));
+        byMockId.put("skill-010", buildSkill("Divine Blessing",
+                "Invokes the favor of the gods to heal and protect.",
+                Prerequisite.ClassRequiredEnum.CLERIC, 20, attr(AttributeMin.AttributeEnum.MENTAL, 30)));
 
-        // Persistance initiale (ids générés par Hibernate).
-        for (CompetenceEntity entity : byMockId.values()) {
-            entityManager.persist(entity);
-        }
+        skillRepository.saveAll(byMockId.values());
 
-        // Chaînage des prérequis (competencesRequises) : entités gérées, flush automatique.
-        link(byMockId, "comp-003", "comp-001");
-        link(byMockId, "comp-004", "comp-002");
-        link(byMockId, "comp-006", "comp-001");
-        link(byMockId, "comp-007", "comp-002", "comp-004");
+        link(byMockId, "skill-003", "skill-001");
+        link(byMockId, "skill-004", "skill-002");
+        link(byMockId, "skill-006", "skill-001");
+        link(byMockId, "skill-007", "skill-002", "skill-004");
 
+        skillRepository.saveAll(byMockId.values());
         return byMockId;
     }
 
     private Map<String, AdventurerEntity> seedAdventurers() {
         Map<String, AdventurerEntity> byMockId = new HashMap<>();
-        byMockId.put("adv-001", buildAdventurer("adv-001", "Thorin Oakenshield", AdventurerDto.AdvClassEnum.GUERRIER, 45, 42, 18, 25, "Un guerrier nain légendaire, chef de la Compagnie."));
-        byMockId.put("adv-002", buildAdventurer("adv-002", "Elara Moonwhisper", AdventurerDto.AdvClassEnum.MAGE, 38, 12, 45, 35, "Une magicienne elfe spécialisée dans la magie lunaire."));
-        byMockId.put("adv-003", buildAdventurer("adv-003", "Shadowbane", AdventurerDto.AdvClassEnum.VOLEUR, 52, 35, 28, 48, "Un assassin mystérieux dont personne ne connaît le vrai nom."));
-        byMockId.put("adv-004", buildAdventurer("adv-004", "Brother Marcus", AdventurerDto.AdvClassEnum.CLERC, 30, 15, 40, 30, "Un prêtre dévoué au service des plus démunis."));
-        byMockId.put("adv-005", buildAdventurer("adv-005", "Lyra Swiftbow", AdventurerDto.AdvClassEnum.RODEUR, 28, 30, 22, 45, "Une archère des forêts du Nord, experte en pistage."));
-        byMockId.put("adv-006", buildAdventurer("adv-006", "Grimlock the Unstoppable", AdventurerDto.AdvClassEnum.BARBARE, 60, 50, 8, 15, "Un berserker orc dont la rage est légendaire."));
-        byMockId.put("adv-007", buildAdventurer("adv-007", "Seraphina Lightbringer", AdventurerDto.AdvClassEnum.PALADIN, 42, 38, 32, 28, "Une paladine au service de la lumière divine."));
-        byMockId.put("adv-008", buildAdventurer("adv-008", "Zephyr Windwalker", AdventurerDto.AdvClassEnum.MOINE, 35, 32, 38, 40, "Un moine ayant atteint l'illumination par la méditation."));
-        byMockId.put("adv-009", buildAdventurer("adv-009", "Viktor Ironforge", AdventurerDto.AdvClassEnum.GUERRIER, 25, 40, 20, 18, "Un forgeron nain capable de créer des armes légendaires."));
-        byMockId.put("adv-010", buildAdventurer("adv-010", "Nyx Shadowdancer", AdventurerDto.AdvClassEnum.VOLEUR, 48, 28, 30, 46, "Une assassine tiefling maîtrisant les arts de l'ombre."));
-        byMockId.put("adv-011", buildAdventurer("adv-011", "Aldric Stormcaller", AdventurerDto.AdvClassEnum.MAGE, 55, 10, 48, 32, "Un archimage humain spécialisé dans la magie élémentaire."));
-        byMockId.put("adv-012", buildAdventurer("adv-012", "Kira Flameheart", AdventurerDto.AdvClassEnum.GUERRIER, 33, 36, 20, 24, "Une guerrière au tempérament de feu."));
-        byMockId.put("adv-013", buildAdventurer("adv-013", "Orion Stargazer", AdventurerDto.AdvClassEnum.RODEUR, 40, 28, 25, 50, "Un ranger nocturne guidé par les étoiles."));
-        byMockId.put("adv-014", buildAdventurer("adv-014", "Sister Helena", AdventurerDto.AdvClassEnum.CLERC, 22, 12, 35, 28, "Une prêtresse novice mais prometteuse."));
+        byMockId.put("adv-001", buildAdventurer("Thorin Oakenshield", AdventurerClass.WARRIOR, 45, 42, 18, 25, "A legendary dwarven warrior, leader of the Company."));
+        byMockId.put("adv-002", buildAdventurer("Elara Moonwhisper", AdventurerClass.MAGE, 38, 12, 45, 35, "An elven mage specialized in lunar magic."));
+        byMockId.put("adv-003", buildAdventurer("Shadowbane", AdventurerClass.ROGUE, 52, 35, 28, 48, "A mysterious assassin whose real name no one knows."));
+        byMockId.put("adv-004", buildAdventurer("Brother Marcus", AdventurerClass.CLERIC, 30, 15, 40, 30, "A priest devoted to serving the most destitute."));
+        byMockId.put("adv-005", buildAdventurer("Lyra Swiftbow", AdventurerClass.RANGER, 28, 30, 22, 45, "An archer of the northern forests, expert tracker."));
+        byMockId.put("adv-006", buildAdventurer("Grimlock the Unstoppable", AdventurerClass.BARBARIAN, 60, 50, 8, 15, "An orc berserker whose rage is legendary."));
+        byMockId.put("adv-007", buildAdventurer("Seraphina Lightbringer", AdventurerClass.PALADIN, 42, 38, 32, 28, "A paladin in the service of divine light."));
+        byMockId.put("adv-008", buildAdventurer("Zephyr Windwalker", AdventurerClass.MONK, 35, 32, 38, 40, "A monk who reached enlightenment through meditation."));
+        byMockId.put("adv-009", buildAdventurer("Viktor Ironforge", AdventurerClass.WARRIOR, 25, 40, 20, 18, "A dwarven smith able to craft legendary weapons."));
+        byMockId.put("adv-010", buildAdventurer("Nyx Shadowdancer", AdventurerClass.ROGUE, 48, 28, 30, 46, "A tiefling assassin mastering the arts of shadow."));
+        byMockId.put("adv-011", buildAdventurer("Aldric Stormcaller", AdventurerClass.MAGE, 55, 10, 48, 32, "A human archmage specialized in elemental magic."));
+        byMockId.put("adv-012", buildAdventurer("Kira Flameheart", AdventurerClass.WARRIOR, 33, 36, 20, 24, "A warrior with a fiery temper."));
+        byMockId.put("adv-013", buildAdventurer("Orion Stargazer", AdventurerClass.RANGER, 40, 28, 25, 50, "A nocturnal ranger guided by the stars."));
+        byMockId.put("adv-014", buildAdventurer("Sister Helena", AdventurerClass.CLERIC, 22, 12, 35, 28, "A novice but promising priestess."));
 
-        for (AdventurerEntity entity : byMockId.values()) {
-            entityManager.persist(entity);
-        }
+        adventurerRepository.saveAll(byMockId.values());
         return byMockId;
     }
 
-    private void seedLinks(Map<String, AdventurerEntity> adventurers, Map<String, CompetenceEntity> competences) {
+    private void seedLinks(Map<String, AdventurerEntity> adventurers, Map<String, SkillEntity> skills) {
         Map<String, List<String>> links = new HashMap<>();
-        links.put("adv-001", List.of("comp-001", "comp-003"));
-        links.put("adv-002", List.of("comp-002", "comp-004"));
-        links.put("adv-003", List.of("comp-001", "comp-005"));
-        links.put("adv-006", List.of("comp-001", "comp-003", "comp-006"));
-        links.put("adv-007", List.of("comp-001", "comp-002"));
-        links.put("adv-011", List.of("comp-002", "comp-004", "comp-007"));
+        links.put("adv-001", List.of("skill-001", "skill-003"));
+        links.put("adv-002", List.of("skill-002", "skill-004"));
+        links.put("adv-003", List.of("skill-001", "skill-005"));
+        links.put("adv-006", List.of("skill-001", "skill-003", "skill-006"));
+        links.put("adv-007", List.of("skill-001", "skill-002"));
+        links.put("adv-011", List.of("skill-002", "skill-004", "skill-007"));
 
-        links.forEach((advId, compIds) -> {
+        links.forEach((advId, skillIds) -> {
             AdventurerEntity adventurer = adventurers.get(advId);
-            for (String compId : compIds) {
-                adventurer.getCompetences().add(competences.get(compId));
+            for (String skillId : skillIds) {
+                adventurer.getSkills().add(skills.get(skillId));
             }
-            // Entité gérée : la liaison sera flushée à la fin de la transaction.
         });
+        adventurerRepository.saveAll(adventurers.values());
     }
 
-    private CompetenceEntity buildCompetence(String mockId, String nom, String description,
-                                             Prerequis.ClasseRequiseEnum classe, Integer niveau,
-                                             CaracteristiqueMinEmbeddable carac) {
-        CompetenceEntity entity = new CompetenceEntity();
-        entity.setNom(nom);
+    private SkillEntity buildSkill(String name, String description,
+                                   Prerequisite.ClassRequiredEnum classRequired, Integer minimumLevel,
+                                   AttributeMinEmbeddable attr) {
+        SkillEntity entity = new SkillEntity();
+        entity.setName(name);
         entity.setDescription(description);
-        entity.setClasseRequise(classe);
-        entity.setNiveauMinimum(niveau);
-        entity.setCaracteristiqueMin(carac);
+        entity.setClassRequired(classRequired);
+        entity.setMinimumLevel(minimumLevel);
+        entity.setAttributeMin(attr);
         return entity;
     }
 
-    private CaracteristiqueMinEmbeddable carac(CaracteristiqueMin.CaracteristiqueEnum type, int valeur) {
-        CaracteristiqueMinEmbeddable carac = new CaracteristiqueMinEmbeddable();
-        carac.setCaracteristique(type);
-        carac.setValeur(valeur);
-        return carac;
+    private AttributeMinEmbeddable attr(AttributeMin.AttributeEnum attribute, int value) {
+        AttributeMinEmbeddable embeddable = new AttributeMinEmbeddable();
+        embeddable.setAttribute(attribute);
+        embeddable.setValue(value);
+        return embeddable;
     }
 
-    private void link(Map<String, CompetenceEntity> byMockId, String target, String... prereqs) {
-        CompetenceEntity entity = byMockId.get(target);
+    private void link(Map<String, SkillEntity> byMockId, String target, String... prereqs) {
+        SkillEntity entity = byMockId.get(target);
         for (String prereq : prereqs) {
-            entity.getCompetencesRequises().add(byMockId.get(prereq));
+            entity.getRequiredSkills().add(byMockId.get(prereq));
         }
     }
 
-    private AdventurerEntity buildAdventurer(String mockId, String name, AdventurerDto.AdvClassEnum advClass,
+    private AdventurerEntity buildAdventurer(String name, AdventurerClass advClass,
                                              int level, int physical, int mental, int perception, String description) {
         AdventurerEntity entity = new AdventurerEntity();
         entity.setName(name);

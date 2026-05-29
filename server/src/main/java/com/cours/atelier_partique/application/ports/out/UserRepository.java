@@ -1,14 +1,12 @@
 package com.cours.atelier_partique.application.ports.out;
 
-import com.cours.atelier_partique.domain.model.UserEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.cours.atelier_partique.domain.model.User;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<UserEntity, UUID> {
+public interface UserRepository {
 
-    Optional<UserEntity> findByUsername(String username);
+    User save(User user);
 
-    boolean existsByUsername(String username);
+    Optional<User> findByUsername(String username);
 }

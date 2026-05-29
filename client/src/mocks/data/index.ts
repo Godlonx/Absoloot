@@ -1,3 +1,3 @@
 export * from "./adventurers"
-export * from "./competences"
+export * from "./skills"
 export * from "./user"

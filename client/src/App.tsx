@@ -3,9 +3,9 @@ import Home from "@/pages/Home"
 import Adventurers from "@/pages/Adventurers"
 import AdventurerDetail from "@/pages/AdventurerDetail"
 import AdventurerForm from "@/pages/AdventurerForm"
-import Competences from "@/pages/Competences"
-import CompetenceDetail from "@/pages/CompetenceDetail"
-import CompetenceForm from "@/pages/CompetenceForm"
+import Skills from "@/pages/Skills"
+import SkillDetail from "@/pages/SkillDetail"
+import SkillForm from "@/pages/SkillForm"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
 import NotFound from "@/pages/NotFound"
@@ -35,24 +35,24 @@ const App = () => {
           <AdventurerForm />
         </ProtectedRoute>
       } />
-      <Route path="/competences" element={
+      <Route path="/skills" element={
         <ProtectedRoute>
-          <Competences />
+          <Skills />
         </ProtectedRoute>
       } />
-      <Route path="/competences/new" element={
+      <Route path="/skills/new" element={
         <ProtectedRoute requiredRole="ADMIN">
-          <CompetenceForm />
+          <SkillForm />
         </ProtectedRoute>
       } />
-      <Route path="/competences/:id" element={
+      <Route path="/skills/:id" element={
         <ProtectedRoute>
-          <CompetenceDetail />
+          <SkillDetail />
         </ProtectedRoute>
       } />
-      <Route path="/competences/:id/edit" element={
+      <Route path="/skills/:id/edit" element={
         <ProtectedRoute requiredRole="ADMIN">
-          <CompetenceForm />
+          <SkillForm />
         </ProtectedRoute>
       } />
       <Route path="/login" element={<Login />} />

@@ -4,7 +4,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-001",
     name: "Thorin Oakenshield",
-    advClass: "GUERRIER",
+    advClass: "WARRIOR",
     level: 45,
     physical: 42,
     mental: 18,
@@ -24,7 +24,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-003",
     name: "Shadowbane",
-    advClass: "VOLEUR",
+    advClass: "ROGUE",
     level: 52,
     physical: 35,
     mental: 28,
@@ -34,7 +34,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-004",
     name: "Brother Marcus",
-    advClass: "CLERC",
+    advClass: "CLERIC",
     level: 30,
     physical: 15,
     mental: 40,
@@ -44,7 +44,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-005",
     name: "Lyra Swiftbow",
-    advClass: "RODEUR",
+    advClass: "RANGER",
     level: 28,
     physical: 30,
     mental: 22,
@@ -54,7 +54,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-006",
     name: "Grimlock the Unstoppable",
-    advClass: "BARBARE",
+    advClass: "BARBARIAN",
     level: 60,
     physical: 50,
     mental: 8,
@@ -74,7 +74,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-008",
     name: "Zephyr Windwalker",
-    advClass: "MOINE",
+    advClass: "MONK",
     level: 35,
     physical: 32,
     mental: 38,
@@ -84,7 +84,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-009",
     name: "Viktor Ironforge",
-    advClass: "GUERRIER",
+    advClass: "WARRIOR",
     level: 25,
     physical: 40,
     mental: 20,
@@ -94,7 +94,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-010",
     name: "Nyx Shadowdancer",
-    advClass: "VOLEUR",
+    advClass: "ROGUE",
     level: 48,
     physical: 28,
     mental: 30,
@@ -114,7 +114,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-012",
     name: "Kira Flameheart",
-    advClass: "GUERRIER",
+    advClass: "WARRIOR",
     level: 33,
     physical: 36,
     mental: 20,
@@ -124,7 +124,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-013",
     name: "Orion Stargazer",
-    advClass: "RODEUR",
+    advClass: "RANGER",
     level: 40,
     physical: 28,
     mental: 25,
@@ -134,7 +134,7 @@ export const mockAdventurers: AdventurerDto[] = [
   {
     id: "adv-014",
     name: "Sister Helena",
-    advClass: "CLERC",
+    advClass: "CLERIC",
     level: 22,
     physical: 12,
     mental: 35,
@@ -144,7 +144,7 @@ export const mockAdventurers: AdventurerDto[] = [
 ]
 
 let adventurersStore = [...mockAdventurers]
-let adventurerCompetences: Record<string, string[]> = {
+let adventurerSkills: Record<string, string[]> = {
   "adv-001": ["comp-001", "comp-003"],
   "adv-002": ["comp-002", "comp-004"],
   "adv-003": ["comp-001", "comp-005"],
@@ -166,7 +166,7 @@ export const createAdventurer = (
     id: `adv-${Date.now()}`,
   }
   adventurersStore.push(newAdventurer)
-  adventurerCompetences[newAdventurer.id] = []
+  adventurerSkills[newAdventurer.id] = []
   return newAdventurer
 }
 
@@ -184,39 +184,39 @@ export const deleteAdventurer = (id: string): boolean => {
   const index = adventurersStore.findIndex((a) => a.id === id)
   if (index === -1) return false
   adventurersStore.splice(index, 1)
-  delete adventurerCompetences[id]
+  delete adventurerSkills[id]
   return true
 }
 
-export const getAdventurerCompetences = (adventurerId: string): string[] =>
-  adventurerCompetences[adventurerId] || []
+export const getAdventurerSkills = (adventurerId: string): string[] =>
+  adventurerSkills[adventurerId] || []
 
-export const addCompetenceToAdventurer = (
+export const addSkillToAdventurer = (
   adventurerId: string,
-  competenceId: string
+  skillId: string
 ): void => {
-  if (!adventurerCompetences[adventurerId]) {
-    adventurerCompetences[adventurerId] = []
+  if (!adventurerSkills[adventurerId]) {
+    adventurerSkills[adventurerId] = []
   }
-  if (!adventurerCompetences[adventurerId].includes(competenceId)) {
-    adventurerCompetences[adventurerId].push(competenceId)
+  if (!adventurerSkills[adventurerId].includes(skillId)) {
+    adventurerSkills[adventurerId].push(skillId)
   }
 }
 
-export const removeCompetenceFromAdventurer = (
+export const removeSkillFromAdventurer = (
   adventurerId: string,
-  competenceId: string
+  skillId: string
 ): void => {
-  if (adventurerCompetences[adventurerId]) {
-    adventurerCompetences[adventurerId] = adventurerCompetences[
+  if (adventurerSkills[adventurerId]) {
+    adventurerSkills[adventurerId] = adventurerSkills[
       adventurerId
-    ].filter((id) => id !== competenceId)
+    ].filter((id) => id !== skillId)
   }
 }
 
 export const resetAdventurersStore = () => {
   adventurersStore = [...mockAdventurers]
-  adventurerCompetences = {
+  adventurerSkills = {
     "adv-001": ["comp-001", "comp-003"],
     "adv-002": ["comp-002", "comp-004"],
     "adv-003": ["comp-001", "comp-005"],

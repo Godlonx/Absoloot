@@ -1,31 +1,37 @@
 package com.cours.atelier_partique.domain.exeption;
 
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.ConflictError;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.ConflictErrorInvalidAdventurersInner;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.Error;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.UnprocessableEntityError;
+import com.cours.atelier_partique.infrastructure.web.openapi.dto.UnprocessableEntityErrorUnmetPrerequisite;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Traduit les exceptions métier en réponses JSON dont la forme est attendue par
- * le client (client/src/services/api.ts) : { status, message } et leurs variantes
- * 409 (detail / aventuriersInvalides) et 422 (prerequisNonSatisfait).
+ * Translates business exceptions into JSON responses. Skill rule violations
+ * follow the contract error schemas (Error / ConflictError /
+ * UnprocessableEntityError); auth exceptions use RFC 7807 ProblemDetail.
  */
 @Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
     @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidRequest(InvalidRequestException ex) {
+    public ResponseEntity<Error> handleInvalidRequest(InvalidRequestException ex) {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
@@ -36,8 +42,8 @@ public class ApiExceptionHandler {
             MethodArgumentTypeMismatchException.class,
             IllegalArgumentException.class
     })
-    public ResponseEntity<Map<String, Object>> handleValidation(Exception ex) {
-        String message = "Données invalides - Vérifiez vos entrées";
+    public ResponseEntity<Error> handleValidation(Exception ex) {
+        String message = "Invalid data - check your inputs";
         if (ex instanceof MethodArgumentNotValidException manv && manv.getBindingResult().getFieldError() != null) {
             var fieldError = manv.getBindingResult().getFieldError();
             message = fieldError.getField() + " : " + fieldError.getDefaultMessage();
@@ -50,60 +56,77 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedException ex) {
+    public ResponseEntity<Error> handleUnauthorized(UnauthorizedException ex) {
         return error(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException ex) {
+    public ResponseEntity<Error> handleNotFound(NotFoundException ex) {
         return error(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
-        Map<String, Object> body = baseBody(HttpStatus.CONFLICT, ex.getMessage());
-        if (ex.getDetail() != null) {
-            body.put("detail", ex.getDetail());
-        }
+    public ResponseEntity<ConflictError> handleConflict(ConflictException ex) {
+        ConflictError body = ConflictError.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .message(ex.getMessage())
+                .detail(ex.getDetail())
+                .build();
         if (ex.getAventuriersInvalides() != null && !ex.getAventuriersInvalides().isEmpty()) {
-            List<Map<String, Object>> invalides = ex.getAventuriersInvalides().stream()
-                    .map(a -> {
-                        Map<String, Object> m = new LinkedHashMap<>();
-                        m.put("id", a.id());
-                        m.put("nom", a.nom());
-                        m.put("raison", a.raison());
-                        return m;
-                    })
+            List<ConflictErrorInvalidAdventurersInner> invalid = ex.getAventuriersInvalides().stream()
+                    .map(a -> ConflictErrorInvalidAdventurersInner.builder()
+                            .id(UUID.fromString(a.id()))
+                            .name(a.nom())
+                            .reason(a.raison())
+                            .build())
                     .collect(Collectors.toList());
-            body.put("aventuriersInvalides", invalides);
+            body.setInvalidAdventurers(invalid);
         }
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(PrerequisNonSatisfaitException.class)
-    public ResponseEntity<Map<String, Object>> handlePrerequis(PrerequisNonSatisfaitException ex) {
-        Map<String, Object> body = baseBody(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
-        Map<String, Object> prereq = new LinkedHashMap<>();
-        prereq.put("type", ex.getType());
-        prereq.put("detail", ex.getDetail());
-        body.put("prerequisNonSatisfait", prereq);
+    public ResponseEntity<UnprocessableEntityError> handlePrerequisite(PrerequisNonSatisfaitException ex) {
+        UnprocessableEntityErrorUnmetPrerequisite unmet =
+                UnprocessableEntityErrorUnmetPrerequisite.builder()
+                        .type(UnprocessableEntityErrorUnmetPrerequisite.TypeEnum.fromValue(ex.getType()))
+                        .detail(ex.getDetail())
+                        .build();
+        UnprocessableEntityError body = UnprocessableEntityError.builder()
+                .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .message(ex.getMessage())
+                .unmetPrerequisite(unmet)
+                .build();
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ProblemDetail handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        return problem(ex, HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+        return problem(ex, HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+    public ResponseEntity<Error> handleGeneric(Exception ex) {
         log.error("Unhandled exception", ex);
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur interne s'est produite");
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "An internal error occurred");
     }
 
-    private ResponseEntity<Map<String, Object>> error(HttpStatus status, String message) {
-        return ResponseEntity.status(status).body(baseBody(status, message));
+    private ResponseEntity<Error> error(HttpStatus status, String message) {
+        return ResponseEntity.status(status).body(Error.builder()
+                .status(status.value())
+                .message(message)
+                .build());
     }
 
-    private Map<String, Object> baseBody(HttpStatus status, String message) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", status.value());
-        body.put("message", message);
-        return body;
+    private static @NonNull ProblemDetail problem(Exception ex, HttpStatus status, String title) {
+        ProblemDetail problem = ProblemDetail.forStatus(status);
+        problem.setTitle(title);
+        problem.setDetail(ex.getMessage());
+        return problem;
     }
 }

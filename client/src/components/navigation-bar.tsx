@@ -19,7 +19,7 @@ import {
 const navigationLinks = [
   { href: "/", label: "Accueil" },
   { href: "/adventurers", label: "Aventuriers" },
-  { href: "/competences", label: "Compétences" },
+  { href: "/skills", label: "Compétences" },
 ];
 
 const NavigationBar = () => {
