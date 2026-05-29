@@ -30,6 +30,7 @@
 		<java.version>25</java.version>
 		<swagger-annotations.version>2.2.36</swagger-annotations.version>
 		<jackson-databind-nullable.version>0.2.7</jackson-databind-nullable.version>
+		<jjwt.version>0.12.6</jjwt.version>
 
 		<openapi-generator.version>7.15.0</openapi-generator.version>
 		<openapi-generator.rootPackage>${root-package}.infrastructure.web.openapi</openapi-generator.rootPackage>
@@ -84,6 +85,10 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
@@ -91,6 +96,28 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-h2console</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.6.3</version>
 		</dependency>
 	</dependencies>
 
@@ -111,7 +138,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/contract.json</inputSpec>
+							<inputSpec>${project.basedir}/contract.yaml</inputSpec>
 							<output>${openapi-generator.output}</output>
 							<generatorName>spring</generatorName>
 							<modelPackage>${openapi-generator.modelPackage}</modelPackage>
@@ -141,7 +168,7 @@
 								<interfaceOnly>true</interfaceOnly>
 								<library>spring-boot</library>
 								<modelNameSuffix>Dto</modelNameSuffix>
-								<openApiNullable>true</openApiNullable>
+								<openApiNullable>false</openApiNullable>
 								<skipDefaultInterface>true</skipDefaultInterface>
 								<useBeanValidation>true</useBeanValidation>
 								<useJakartaEe>true</useJakartaEe>
@@ -171,6 +198,11 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</path>
+							<path>
+								<groupId>org.mapstruct</groupId>
+								<artifactId>mapstruct-processor</artifactId>
+								<version>1.6.3</version>
+							</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
