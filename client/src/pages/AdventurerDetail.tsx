@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/AuthContext"
 import * as adventurersService from "@/services/adventurers.service"
 import * as adventurerCompetencesService from "@/services/adventurer-competences.service"
+import * as competencesService from "@/services/competences.service"
+import CompetenceTree from "@/components/competence-tree/CompetenceTree"
 import type {
   AdventurerDto,
   CompetenceDto,
@@ -19,6 +21,7 @@ const AdventurerDetail = () => {
 
   const [adventurer, setAdventurer] = useState<AdventurerDto | null>(null)
   const [competences, setCompetences] = useState<CompetenceDto[]>([])
+  const [catalog, setCatalog] = useState<CompetenceDto[]>([])
   const [disponibles, setDisponibles] =
     useState<CompetencesDisponiblesResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -47,15 +50,17 @@ const AdventurerDetail = () => {
       setError(null)
 
       try {
-        const [adventurerData, competencesData, disponiblesData] =
+        const [adventurerData, competencesData, disponiblesData, catalogData] =
           await Promise.all([
             adventurersService.get(id),
             adventurerCompetencesService.list(id),
             adventurerCompetencesService.listDisponibles(id),
+            competencesService.list(0, 1000),
           ])
         setAdventurer(adventurerData)
         setCompetences(competencesData)
         setDisponibles(disponiblesData)
+        setCatalog(catalogData.content)
       } catch {
         setError("Impossible de charger les donnees de l'aventurier.")
       } finally {
@@ -226,109 +231,27 @@ const AdventurerDetail = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Competences acquises</CardTitle>
+            <CardTitle>Arbre de competences</CardTitle>
           </CardHeader>
           <CardContent>
-            {competences.length === 0 ? (
-              <p className="text-muted-foreground">
-                Aucune competence acquise.
-              </p>
+            {disponibles ? (
+              <CompetenceTree
+                adventurer={adventurer}
+                catalog={catalog}
+                acquises={competences}
+                disponibles={disponibles}
+                role={role}
+                adventurerId={id ?? ""}
+                onAdd={handleAddCompetence}
+                onRemove={handleRemoveCompetence}
+              />
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {competences.map((competence) => (
-                  <div
-                    key={competence.id}
-                    className="flex items-center gap-1 rounded-md bg-primary/10 px-3 py-1.5"
-                  >
-                    <Link
-                      to={`/competences/${competence.id}`}
-                      className="text-sm font-medium text-primary hover:underline"
-                    >
-                      {competence.nom}
-                    </Link>
-                    {role === "ADMIN" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="ml-1 h-5 w-5 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() =>
-                          handleRemoveCompetence(competence.id, competence.nom)
-                        }
-                      >
-                        X
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <p className="text-muted-foreground">
+                Impossible de charger l'arbre de competences.
+              </p>
             )}
           </CardContent>
         </Card>
-
-        {role === "ADMIN" && disponibles && disponibles.acquerables.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Competences acquerables</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {disponibles.acquerables.map((competence) => (
-                  <div
-                    key={competence.id}
-                    className="flex items-center gap-2 rounded-md border px-3 py-1.5"
-                  >
-                    <Link
-                      to={`/competences/${competence.id}`}
-                      className="text-sm font-medium hover:underline"
-                    >
-                      {competence.nom}
-                    </Link>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-6 px-2 text-xs"
-                      onClick={() => handleAddCompetence(competence.id)}
-                    >
-                      Ajouter
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {disponibles && disponibles.bloquees.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Competences bloquees</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {disponibles.bloquees.map((item) => (
-                  <div
-                    key={item.competence.id}
-                    className="rounded-md border border-muted bg-muted/30 px-3 py-2"
-                  >
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {item.competence.nom}
-                    </p>
-                    <div className="mt-1 space-y-0.5">
-                      {item.prerequisManquants.map((prereq, index) => (
-                        <p
-                          key={index}
-                          className="text-xs text-muted-foreground"
-                        >
-                          {prereq.type}: {prereq.detail}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   )
